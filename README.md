@@ -14,7 +14,7 @@ Releases available soon, for now build the binary using
 
 ````
 npm install
-npm package --all
+npm run package --all
 ````
 
 ## Screenshots
