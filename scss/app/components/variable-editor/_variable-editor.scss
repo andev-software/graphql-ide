@@ -1,0 +1,101 @@
+.VariableEditor {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-bottom: 1px solid $border-color;
+  background-color: #fafafa;
+}
+
+.VariableEditorBody {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 52px;
+  padding: 8px 7px 8px 13px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .NoVariables {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .NoVariables__Message {
+      display: inline-block;
+      opacity: 0.4;
+    }
+  }
+}
+
+.VariableEditorFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52px;
+  background-color: #f0f0f0;
+  border-top: 1px solid $border-color;
+  padding: 12px 13px;
+}
+
+.VariableItem {
+  display: flex;
+  margin-bottom: 10px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.VariableItem__Key, .VariableItem__Value {
+  display: flex;
+  width: calc(50% - 50px);
+
+  .Input {
+    width: 100%;
+    border: 1px solid #d3d3d3;
+    border-radius: 3px;
+    padding: 3px 8px;
+    color: #444;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+
+    &:focus {
+      border-color: #E10098;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 0 3px rgba(225, 0, 152, 0.1);
+    }
+
+    &.error {
+      border-color: red;
+    }
+  }
+}
+
+.VariableItem__Element {
+  padding: 0 5px;
+
+  &:first-of-type {
+    padding-left: 0;
+  }
+
+  &:last-of-type {
+    padding-right: 0;
+  }
+}
+
+.VariableItem__RemoveButton {
+  display: flex;
+  width: 100px;
+
+  button {
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+  }
+}

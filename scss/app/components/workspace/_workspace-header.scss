@@ -1,0 +1,38 @@
+.Workspace__Header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #dfdfdf;
+  border-bottom: 1px solid #b4b4b4;
+  padding: 12px 13px;
+  display: flex;
+}
+
+.HeaderSection {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-around;
+
+  &.HeaderSection--left,
+  &.HeaderSection--right {
+    width: calc(50% - 100px);
+  }
+
+  &.HeaderSection--center {
+     width: 200px;
+  }
+}
+
+.Title {
+  display: inline-block;
+  margin: 0 auto;
+  color: #444;
+  font-size: 18px;
+
+  em {
+    font-family: georgia;
+    font-size: 21px;
+  }
+}
