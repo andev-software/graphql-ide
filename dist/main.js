@@ -77407,11 +77407,6 @@ webpackJsonp([0],[
 	                    ),
 	                    _react2.default.createElement(
 	                        "div",
-	                        { className: "HeaderSection HeaderSection--center" },
-	                        this.props.center
-	                    ),
-	                    _react2.default.createElement(
-	                        "div",
 	                        { className: "HeaderSection HeaderSection--right" },
 	                        this.props.right
 	                    )
@@ -79444,7 +79439,7 @@ webpackJsonp([0],[
 	                    })
 	                );
 
-	                var HEADER_HEIGHT = 59;
+	                var HEADER_HEIGHT = 40;
 	                var PANEL_HEIGHT = this.state.panel !== null ? 200 : 0;
 	                var DRAWER_WIDTH = 350;
 
@@ -82958,7 +82953,7 @@ webpackJsonp([0],[
 	            value: function render() {
 	                var _this3 = this;
 
-	                var HEADER_HEIGHT = 59;
+	                var HEADER_HEIGHT = 40;
 
 	                var leftButtons = [{
 	                    description: 'Import',

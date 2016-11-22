@@ -297,7 +297,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                 </div>
             )
 
-            const HEADER_HEIGHT = 59
+            const HEADER_HEIGHT = 40
             const PANEL_HEIGHT = this.state.panel !== null ? 200 : 0
             const DRAWER_WIDTH = 350
 

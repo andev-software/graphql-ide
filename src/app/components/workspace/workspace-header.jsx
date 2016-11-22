@@ -17,9 +17,6 @@ export default () => {
                     <div className="HeaderSection HeaderSection--left">
                         {this.props.left}
                     </div>
-                    <div className="HeaderSection HeaderSection--center">
-                        {this.props.center}
-                    </div>
                     <div className="HeaderSection HeaderSection--right">
                         {this.props.right}
                     </div>

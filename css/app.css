@@ -233,8 +233,9 @@
   right: 0;
   background-color: #dfdfdf;
   border-bottom: 1px solid #b4b4b4;
-  padding: 12px 13px;
-  display: flex; }
+  padding: 6px 13px 6px 83px;
+  display: flex;
+  -webkit-app-region: drag; }
 
 .HeaderSection {
   display: flex;

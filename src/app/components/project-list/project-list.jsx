@@ -35,7 +35,7 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
 
         render() {
 
-            const HEADER_HEIGHT = 59
+            const HEADER_HEIGHT = 40
 
             const leftButtons = [{
                 description: 'Import',

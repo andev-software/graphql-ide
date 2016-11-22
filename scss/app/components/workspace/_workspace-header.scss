@@ -5,8 +5,9 @@
   right: 0;
   background-color: #dfdfdf;
   border-bottom: 1px solid #b4b4b4;
-  padding: 12px 13px;
+  padding: 6px 13px 6px 83px;
   display: flex;
+  -webkit-app-region: drag; // Allow dragging of the window
 }
 
 .HeaderSection {
@@ -21,7 +22,7 @@
   }
 
   &.HeaderSection--center {
-     width: 200px;
+    width: 200px;
   }
 }
 
