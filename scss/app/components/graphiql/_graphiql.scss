@@ -4,9 +4,11 @@
     background-color: #ffffff;
     border-radius: 3px;
     padding: 3px 8px;
+    font-size: 12px;
     color: #444;
-    border: 1px solid #cecece;
     transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    border: 1px solid transparent;
+    box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.15), 0 -0.5px 0 rgba(0, 0, 0, 0.15), 0.5px 0 0 rgba(0, 0, 0, 0.15), -0.5px 0 0 rgba(0, 0, 0, 0.15);
 
     &:focus {
       border-color: #E10098;

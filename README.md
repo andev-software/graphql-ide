@@ -1,6 +1,6 @@
 # GraphiQL App
 
-*Be efficient at executing GraphQL queries*
+️ *Be efficient at executing GraphQL queries*
 
 ## Features
 

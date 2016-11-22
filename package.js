@@ -9,7 +9,7 @@ const argv = require('minimist')(process.argv.slice(2))
 const devDeps = Object.keys(require('./package.json').devDependencies)
 
 
-const appName = argv.name || argv.n || 'GraphiQL App'
+const appName = argv.name || argv.n || 'GraphiQL'
 const shouldUseAsar = argv.asar || argv.a || false
 const shouldBuildAll = argv.all || false
 const shouldPrune = argv.prune || true
