@@ -1,17 +1,35 @@
 import React from 'react'
 import electron from "electron"
-import axios from "axios"
 import moment from "moment"
 import {introspectionQuery, buildClientSchema} from 'graphql'
 import getQueryFacts from "app/components/graphiql/utils/get-query-facts"
 import {fromJS, Map, List} from "immutable"
-import uuid from "node-uuid"
+import uuid from "uuid"
 import VariableEditorController from "./variable-editor-controller"
 import HeaderEditorController from "./header-editor-controller"
 import reduce from "lodash/reduce"
 import forEach from "lodash/forEach"
 import get from "lodash/get"
 import createModal from "app/utils/create-modal"
+import querystring from "querystring"
+import omitBy from "lodash/omitBy"
+import isNil from "lodash/isNil"
+import isEmpty from "lodash/isEmpty"
+import merge from "lodash/merge"
+
+const DEFAULT_GET_HEADERS = {}
+
+const DEFAULT_POST_HEADERS = {
+    'content-type': 'application/json'
+}
+
+const NEW_QUERY = Map({
+    method: 'POST',
+    query: '',
+    operationName: '',
+    variables: '',
+    headers: List()
+})
 
 function writeQuery({query}) {
 
@@ -19,6 +37,7 @@ function writeQuery({query}) {
 
     return {
         type: query.get('type'),
+        method: query.get('method'),
         query: query.get('query'),
         title: query.get('title'),
         operationName: query.get('operationName'),
@@ -38,6 +57,7 @@ function readQuery({query}) {
         _id: query._id,
         title: query.title,
         type: query.type,
+        method: query.method,
         query: query.query,
         operationName: query.operationName,
         variables: query.variables ? JSON.stringify(query.variables, null, 4) : '',
@@ -94,18 +114,13 @@ function applyVariablesToHeaders(headers, variables) {
     }, {})
 }
 
-const NEW_QUERY = Map({
-    query: '',
-    operationName: '',
-    variables: '',
-    headers: List([
-        Map({
-            id: uuid.v4(),
-            key: 'Content-Type',
-            value: 'application/json'
-        })
-    ])
-})
+function transformHeaders({headers}) {
+
+    return headers.reduce((result, header) => {
+        result[header.get('key')] = header.get('value')
+        return result
+    }, {})
+}
 
 export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, MenuItem, VariableEditor, HeaderEditor, QueryList, GraphiQL, ProjectFormModal) => {
 
@@ -145,6 +160,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                     return this.fetchSchema(endpoint)
                 })
                 .then(() => {
+
                     this.setState({
                         loading: false
                     })
@@ -190,18 +206,15 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
         fetchSchema(endpoint) {
 
-            return axios({
+            return this.fetchQuery({
                 url: endpoint.url,
-                method: 'post',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                data: {
+                method: 'POST',
+                headers: {},
+                params: {
                     query: introspectionQuery
-                },
+                }
             }).then(response => {
-                return response.data
-            }).then(response => {
+
                 this.setState({
                     schemas: this.state.schemas.set(endpoint.id, buildClientSchema(response.data))
                 })
@@ -283,6 +296,9 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
             const headerRight = (
                 <div className="Menu Menu--horizontal Menu--right">
+                    <div className="MenuItem">
+                        {this.renderMethodsSelect()}
+                    </div>
                     <div className="MenuItem">
                         {this.renderEndpointsSelect()}
                     </div>
@@ -472,6 +488,19 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                 })
         }
 
+        renderMethodsSelect() {
+
+            const method = this.state.query.get('method')
+
+            return (
+                <select ref="method" name="method" className="Select form-control" value={method}
+                        onChange={this.handleMethodChange}>
+                    <option value="POST">POST</option>
+                    <option value="GET">GET</option>
+                </select>
+            )
+        }
+
         renderEndpointsSelect() {
 
             const endpoint = getQueryEndpointOrProjectDefault(this.state.query, this.state.project)
@@ -496,6 +525,15 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
             if (!this.state.schemas.has(endpoint.id)) {
                 this.fetchSchema(endpoint)
             }
+        }
+
+        handleMethodChange = () => {
+
+            const method = this.refs.method.value
+
+            this.setState({
+                query: this.state.query.set('method', method)
+            })
         }
 
         handleEndpointChange = () => {
@@ -558,34 +596,61 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
             })
         }
 
+        fetchQuery = ({url, method, headers, params}) => {
+
+            params = omitBy(params, isNil)
+            params = omitBy(params, isEmpty)
+
+            let options = {
+                method,
+                credentials: 'include'
+            }
+
+            if (method == "GET") {
+
+                options.headers = merge(DEFAULT_GET_HEADERS, headers)
+
+                url += url.indexOf('?') == -1 ? "?" : "&"
+
+                url += querystring.stringify(params)
+            }
+
+            else {
+
+                options.headers = merge(DEFAULT_POST_HEADERS, headers)
+
+                options.body = JSON.stringify(params)
+            }
+
+            console.log({
+                url,
+                options
+            })
+
+            return fetch(url, options).then(res => res.json())
+        }
+
         graphQLFetcher = (params) => {
 
             let {query} = this.state
 
-            let headers = {
-                'Content-Type': 'application/json'
-            }
-
-            if (query.query) {
-                headers = query.query.get('headers').reduce((result, header) => {
-                    result[header.get('key')] = header.get('value')
-                    return result
-                }, {})
-            }
+            const headers = transformHeaders({
+                headers: query.get('headers')
+            })
 
             const endpoint = getQueryEndpointOrProjectDefault(query, this.state.project)
 
             const startTime = moment()
 
-            return axios({
+            return this.fetchQuery({
                 url: endpoint.url,
-                method: 'post',
+                method: query.get('method'),
                 headers: applyVariablesToHeaders(headers, this.state.project.variables),
-                data: {
+                params: {
                     query: query.get('query'),
                     operationName: query.get('operationName'),
                     variables: query.get('variables')
-                },
+                }
             }).then(response => {
 
                 query = query.merge({

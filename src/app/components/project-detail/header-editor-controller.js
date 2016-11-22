@@ -1,4 +1,4 @@
-import uuid from "node-uuid"
+import uuid from "uuid"
 import {Map, List} from "immutable"
 
 export default (delegate) => {

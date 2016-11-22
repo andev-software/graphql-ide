@@ -1,5 +1,4 @@
 import React from "react"
-import {promisify} from "bluebird"
 import createModal from "app/utils/create-modal"
 import electron from "electron"
 import {Map, List} from "immutable"

@@ -68,6 +68,7 @@ export default (mutations, queries) => {
 
             return getDefined(query, [
                 'title',
+                'method',
                 'type',
                 'createdAt',
                 'endpointId',

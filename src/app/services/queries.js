@@ -64,16 +64,10 @@ export default (db) => {
         })
     }
 
-    function exportProject({projectId}) {
-
-
-    }
-
     return {
         allProjects,
         findProject,
         findProjectQueries,
-        findQuery,
-        exportProject
+        findQuery
     }
 }
