@@ -1,6 +1,12 @@
-# GraphiQL App
+<p align="center">
+    <img alt="GraphiQL app" src="assets/logo.png" width="440">
+</p>
 
-️⚡️ *Be efficient at executing GraphQL queries*
+<p align="center">
+  An Electron-based wrapper around GraphiQL
+</p>
+
+---
 
 ## Features
 

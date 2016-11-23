@@ -1,6 +1,6 @@
 import React from "react"
 import {Map, List} from "immutable"
-import uuid from "node-uuid"
+import uuid from "uuid"
 
 export default (EndpointItem) => {
 
