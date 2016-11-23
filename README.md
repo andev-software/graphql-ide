@@ -1,6 +1,5 @@
-# GraphiQL App
-
-️ *Be efficient at executing GraphQL queries*
+![GraphiQL app](assets/logo.png)
+*An Electron-based wrapper around GraphiQL*
 
 ## Features
 

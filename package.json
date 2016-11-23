@@ -1,6 +1,6 @@
 {
   "name": "graphiql-app",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -9,8 +9,15 @@
     "package-all": "node package.js --all"
   },
   "keywords": [],
-  "author": "= <=> (=)",
-  "license": "ISC",
+  "license": "MIT",
+  "homepage": "https://github.com/redound/graphiql-app",
+  "bugs": {
+    "url": "https://github.com/redound/graphiql-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/redound/graphiql-app.git"
+  },
   "dependencies": {
     "classnames": "^2.2.5",
     "graphiql": "^0.8.0",
