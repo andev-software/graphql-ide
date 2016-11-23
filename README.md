@@ -1,5 +1,12 @@
-![GraphiQL app](assets/logo.png)
-*An Electron-based wrapper around GraphiQL*
+<p align="center">
+    <img alt="GraphiQL app" src="assets/logo.png" width="340">
+</p>
+
+<p align="center">
+  An Electron-based wrapper around GraphiQL
+</p>
+
+---
 
 ## Features
 
