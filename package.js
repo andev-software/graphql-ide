@@ -6,8 +6,6 @@ const del = require('del')
 const assign = require('lodash/assign')
 const latest = require('github-latest-release')
 const argv = require('minimist')(process.argv.slice(2))
-const devDeps = Object.keys(require('./package.json').devDependencies)
-
 
 const appName = argv.name || argv.n || 'GraphiQL'
 const shouldUseAsar = argv.asar || argv.a || false
