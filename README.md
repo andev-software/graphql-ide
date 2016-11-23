@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="GraphiQL app" src="assets/logo.png" width="340">
+    <img alt="GraphiQL app" src="assets/logo.png" width="440">
 </p>
 
 <p align="center">
