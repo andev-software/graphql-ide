@@ -1,9 +1,9 @@
 <p align="center">
-    <img alt="GraphiQL app" src="assets/logo.png" width="440">
+    <img alt="GraphQL IDE" src="assets/logo.png" width="440">
 </p>
 
 <p align="center">
-  An Electron-based wrapper around GraphiQL
+  An extensive IDE for exploring GraphQL API's
 </p>
 
 ---
@@ -50,4 +50,4 @@ Project variables for dynamic headers
 Manage projects
 ![Manage projects](assets/screenshot-4.png)
 
-[0]: https://github.com/redound/graphiql-app/releases
+[0]: https://github.com/redound/graphql-ide/releases

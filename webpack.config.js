@@ -10,12 +10,12 @@ var options = {
             'react-dom',
             'react-router'
         ],
-        main: [
+        app: [
             './src/index.jsx'
         ]
     },
     output: {
-        filename: "main.js",
+        filename: "[name].js",
         path: './dist'
     },
     resolve: {

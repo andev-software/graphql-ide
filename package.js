@@ -7,7 +7,7 @@ const assign = require('lodash/assign')
 const latest = require('github-latest-release')
 const argv = require('minimist')(process.argv.slice(2))
 
-const appName = argv.name || argv.n || 'GraphiQL'
+const appName = argv.name || argv.n || 'GraphQL IDE'
 const shouldUseAsar = argv.asar || argv.a || false
 const shouldBuildAll = argv.all || false
 const shouldPrune = argv.prune || true

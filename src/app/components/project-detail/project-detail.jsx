@@ -87,7 +87,7 @@ function getOperationType({schema, query, operationName}) {
 
 function getQueryEndpointOrProjectDefault(query, project) {
 
-    const id = query.endpointId || null
+    const id = query.get('endpointId') || null
 
     if (id) {
         const endpoint = project.endpoints.find(endpoint => endpoint.id === id)
@@ -135,8 +135,8 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
         state = {
             panel: null,
-            project: true,
-            queries: true,
+            project: null,
+            queries: [],
             loading: true,
             operationName: '',
             schemas: Map(),
@@ -193,6 +193,10 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
         fetchQueries({projectId}) {
 
+            if (!this.state.project.settings.queryListState) {
+                return
+            }
+
             return queries.findProjectQueries({
                 projectId,
                 type: this.state.project.settings.queryListState
@@ -241,17 +245,19 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
             const endpoint = getQueryEndpointOrProjectDefault(this.state.query, this.state.project)
 
+            const queryListState = this.state.project.settings.queryListState
+
             const buttonsLeft = [{
                 description: 'Back',
                 onClick: () => history.push('/project-list')
             }, {
                 description: 'Collection',
-                active: this.state.project.settings.queryListState === 'COLLECTION',
-                onClick: () => this.setQueryListState('COLLECTION')
+                active: queryListState === 'COLLECTION',
+                onClick: () => queryListState === 'COLLECTION' ? this.setQueryListState(null) : this.setQueryListState('COLLECTION')
             }, {
                 description: 'History',
-                active: this.state.project.settings.queryListState === 'HISTORY',
-                onClick: () => this.setQueryListState('HISTORY')
+                active: queryListState === 'HISTORY',
+                onClick: () => queryListState === 'HISTORY' ? this.setQueryListState(null) : this.setQueryListState('HISTORY')
             }]
 
             const headerLeft = (
@@ -315,7 +321,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
             const HEADER_HEIGHT = 40
             const PANEL_HEIGHT = this.state.panel !== null ? 200 : 0
-            const DRAWER_WIDTH = 350
+            const DRAWER_WIDTH = queryListState !== null ? 350 : 0
 
             return (
                 <Layout>
@@ -355,21 +361,23 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                                      height: height - HEADER_HEIGHT - PANEL_HEIGHT
                                  }}
                             >
-                                <div
-                                    className="ProjectDetail__Drawer"
-                                    style={{
-                                        width: DRAWER_WIDTH,
-                                        height: height - HEADER_HEIGHT - PANEL_HEIGHT
-                                    }}
-                                >
-                                    <QueryList
-                                        data={this.state.queries}
-                                        rowHeight={72}
-                                        activeId={this.state.query && this.state.query._id}
-                                        onItemClick={this.handleQueryClick}
-                                        onItemRemove={this.handleQueryRemove}
-                                    />
-                                </div>
+                                {queryListState !== null ? (
+                                    <div
+                                        className="ProjectDetail__Drawer"
+                                        style={{
+                                            width: DRAWER_WIDTH,
+                                            height: height - HEADER_HEIGHT - PANEL_HEIGHT
+                                        }}
+                                    >
+                                        <QueryList
+                                            data={this.state.queries}
+                                            rowHeight={72}
+                                            activeId={this.state.query && this.state.query._id}
+                                            onItemClick={this.handleQueryClick}
+                                            onItemRemove={this.handleQueryRemove}
+                                        />
+                                    </div>
+                                ): null}
                                 <div
                                     className="ProjectDetail__GraphiQL"
                                     style={{
@@ -586,7 +594,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                 projectId,
                 key: 'queryListState',
                 value: state
-            }).then(project => {
+            }).then(() => {
 
                 this.fetchProject({
                     projectId
@@ -621,11 +629,6 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
                 options.body = JSON.stringify(params)
             }
-
-            console.log({
-                url,
-                options
-            })
 
             return fetch(url, options).then(res => res.json())
         }

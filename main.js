@@ -11,7 +11,7 @@ const url = require('url')
 electron.crashReporter.start({
     productName: 'GraphiQL',
     companyName: 'Redound',
-    submitURL: 'https://github.com/redound/graphiql-app/issues',
+    submitURL: 'https://github.com/redound/graphql-ide/issues',
     autoSubmit: true
 })
 
