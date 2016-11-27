@@ -47,6 +47,27 @@ export default di => {
     })
 
     di.register({
+        name: 'app/components/tabs/TabAddButton',
+        dependencies: [],
+        factory: require('app/components/tabs/tab-add-button').default
+    })
+
+    di.register({
+        name: 'app/components/tabs/TabItem',
+        dependencies: [],
+        factory: require('app/components/tabs/tab-item').default
+    })
+
+    di.register({
+        name: 'app/components/tabs/Tabs',
+        dependencies: [
+            'app/components/tabs/TabItem',
+            'app/components/tabs/TabAddButton'
+        ],
+        factory: require('app/components/tabs/tabs').default
+    })
+
+    di.register({
         name: 'app/components/layout/Layout',
         dependencies: [],
         factory: require('app/components/layout/layout').default
@@ -149,6 +170,7 @@ export default di => {
             'app/components/variableEditor/VariableEditor',
             'app/components/headerEditor/HeaderEditor',
             'app/components/queryList/QueryList',
+            'app/components/tabs/Tabs',
             'app/components/graphiql/GraphiQL',
             'app/components/projectFormModal/ProjectFormModal'
         ],

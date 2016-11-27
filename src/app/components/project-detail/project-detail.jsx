@@ -1,7 +1,7 @@
 import React from 'react'
 import electron from "electron"
 import moment from "moment"
-import {introspectionQuery, buildClientSchema} from 'graphql'
+import {introspectionQuery, buildClientSchema, print, parse} from 'graphql'
 import getQueryFacts from "app/components/graphiql/utils/get-query-facts"
 import {fromJS, Map, List} from "immutable"
 import uuid from "uuid"
@@ -16,6 +16,7 @@ import omitBy from "lodash/omitBy"
 import isNil from "lodash/isNil"
 import isEmpty from "lodash/isEmpty"
 import merge from "lodash/merge"
+import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 
 const DEFAULT_GET_HEADERS = {}
 
@@ -122,16 +123,11 @@ function transformHeaders({headers}) {
     }, {})
 }
 
-export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, MenuItem, VariableEditor, HeaderEditor, QueryList, GraphiQL, ProjectFormModal) => {
+export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, MenuItem, VariableEditor, HeaderEditor, QueryList, Tabs, GraphiQL, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
     return class ProjectDetail extends React.Component {
-
-        ctrls = {
-            projectFormModal: null,
-            graphiql: null
-        }
 
         state = {
             panel: null,
@@ -140,7 +136,29 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
             loading: true,
             operationName: '',
             schemas: Map(),
-            query: NEW_QUERY
+            query: NEW_QUERY,
+            activeTabId: null,
+            response: null,
+            docExplorerPaneOpen: false,
+            tabs: [{
+                id: uuid.v4(),
+                title: 'AllProjectsQuery'
+            }, {
+                id: uuid.v4(),
+                title: 'FindProjectsQuery'
+            }, {
+                id: uuid.v4(),
+                title: 'FindItemQuery'
+            }, {
+                id: uuid.v4(),
+                title: 'FindResourceQuery'
+            }, {
+                id: uuid.v4(),
+                title: 'FindTicketQuery'
+            }, {
+                id: uuid.v4(),
+                title: 'AllTenantsQuery'
+            }]
         }
 
         constructor(props) {
@@ -258,6 +276,12 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                 description: 'History',
                 active: queryListState === 'HISTORY',
                 onClick: () => queryListState === 'HISTORY' ? this.setQueryListState(null) : this.setQueryListState('HISTORY')
+            }, {
+                description: 'Run query',
+                onClick: () => this.runQuery()
+            }, {
+                description: 'Prettify query',
+                onClick: () => this.handlePrettifyQuery()
             }]
 
             const headerLeft = (
@@ -298,6 +322,14 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                         panel: this.state.panel === 'headerEditor' ? null : 'headerEditor'
                     })
                 }
+            }, {
+                description: (this.state.docExplorerPaneOpen ? 'Hide' : 'Show') + ' docs',
+                active: this.state.docExplorerPaneOpen,
+                onClick: () => {
+                    this.setState({
+                        docExplorerPaneOpen: !this.state.docExplorerPaneOpen
+                    })
+                }
             }]
 
             const headerRight = (
@@ -320,8 +352,10 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
             )
 
             const HEADER_HEIGHT = 40
+            const TABS_HEIGHT = 40
             const PANEL_HEIGHT = this.state.panel !== null ? 200 : 0
             const DRAWER_WIDTH = queryListState !== null ? 350 : 0
+            const DOC_EXPLORER_PANE_WIDTH = this.state.docExplorerPaneOpen ? 350 : 0
 
             return (
                 <Layout>
@@ -381,38 +415,76 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                                 <div
                                     className="ProjectDetail__GraphiQL"
                                     style={{
-                                        width: width - DRAWER_WIDTH,
+                                        left: DRAWER_WIDTH,
+                                        width: width - DRAWER_WIDTH - DOC_EXPLORER_PANE_WIDTH,
                                         height: height - HEADER_HEIGHT - PANEL_HEIGHT
                                     }}
                                 >
-                                    <GraphiQL
-                                        ref={ref => this.ctrls.graphiql = ref}
-                                        schema={this.state.schemas.get(endpoint.id)}
-                                        fetcher={this.graphQLFetcher}
-                                        onEditQuery={this.handleEditQuery}
-                                        onEditVariables={this.handleEditVariables}
-                                        onEditOperationName={this.handleEditOperationName}
-                                        query={this.state.query.get('query')}
-                                        operationName={this.state.query.get('operationName')}
-                                        variables={this.state.query.get('variables')}
+                                    <div
+                                        className="Tabs__Holder"
+                                        style={{
+                                            width: width - DRAWER_WIDTH - DOC_EXPLORER_PANE_WIDTH,
+                                            height: TABS_HEIGHT
+                                        }}
                                     >
-                                        <GraphiQL.Toolbar>
-                                            <input
-                                                ref={ref => this.ctrls.operationNameInput = ref}
-                                                className="toolbar-input"
-                                                value={this.state.operationName || ''}
-                                                onChange={this.handleOperationNameChange}
-                                            />
-                                            <button className="toolbar-button" onClick={this.handleSaveQuery}>
-                                                Save
-                                            </button>
-                                        </GraphiQL.Toolbar>
-                                    </GraphiQL>
+                                        <Tabs
+                                            width={width - DRAWER_WIDTH - DOC_EXPLORER_PANE_WIDTH}
+                                            height={TABS_HEIGHT}
+                                            activeId={this.state.activeTabId}
+                                            tabs={this.state.tabs}
+                                            onClick={this.handleTabClick}
+                                            onRemove={this.handleTabRemove}
+                                            onAdd={this.handleTabAdd}
+                                        />
+                                    </div>
+                                    <div
+                                        className="GraphiQL__Holder"
+                                        style={{
+                                            top: TABS_HEIGHT,
+                                            width: width - DRAWER_WIDTH - DOC_EXPLORER_PANE_WIDTH,
+                                            height: height - HEADER_HEIGHT - PANEL_HEIGHT - TABS_HEIGHT
+                                        }}
+                                    >
+                                        <GraphiQL
+                                            ref={ref => this.graphiql = ref}
+                                            schema={this.state.schemas.get(endpoint.id)}
+                                            onEditQuery={this.handleEditQuery}
+                                            onEditVariables={this.handleEditVariables}
+                                            onEditOperationName={this.handleEditOperationName}
+                                            onRunQuery={this.handleEditorRunQuery}
+                                            query={this.state.query.get('query')}
+                                            operationName={this.state.query.get('operationName')}
+                                            response={this.state.response}
+                                            variables={this.state.query.get('variables')}
+                                            isWaitingForResponse={this.state.isWaitingForResponse}
+                                        />
+                                    </div>
                                 </div>
+                                {
+                                    this.state.docExplorerPaneOpen &&
+                                    <div className="DocExplorerPane" style={{
+                                        width: DOC_EXPLORER_PANE_WIDTH,
+                                        height: height - HEADER_HEIGHT - PANEL_HEIGHT
+                                    }}>
+                                        <div
+                                            className="docExplorerWrap"
+                                            style={{
+                                                width: DOC_EXPLORER_PANE_WIDTH
+                                            }}
+                                        >
+                                            <DocExplorer
+                                                ref={c => {
+                                                    this.docExplorerComponent = c;
+                                                }}
+                                                schema={this.getSchema()}
+                                            />
+                                        </div>
+                                    </div>
+                                }
                             </div>
                             <div className="overlay">
                                 <ProjectFormModal
-                                    ref={ref => this.ctrls.projectFormModal = ref}
+                                    ref={ref => this.projectFormModal = ref}
                                     title="Edit Project"
                                 />
                             </div>
@@ -420,6 +492,94 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                     )}
                 </Layout>
             )
+        }
+
+        getSchema() {
+            const endpoint = getQueryEndpointOrProjectDefault(this.state.query, this.state.project)
+            return this.state.schemas.get(endpoint.id)
+        }
+
+        handlePrettifyQuery = () => {
+            this.setState({
+                query: this.state.query.set('query', print(parse(this.state.query.get('query'))))
+            })
+        }
+
+        handleEditorRunQuery = () => {
+            this.runQuery()
+        }
+
+        runQuery = async() => {
+
+            let {query} = this.state
+
+            console.log('query', query)
+
+            const headers = transformHeaders({
+                headers: query.get('headers')
+            })
+
+            const endpoint = getQueryEndpointOrProjectDefault(query, this.state.project)
+
+            const startTime = moment()
+
+            this.setState({
+                isWaitingForResponse: true
+            })
+
+            const response = await this.fetchQuery({
+                url: endpoint.url,
+                method: query.get('method'),
+                headers: applyVariablesToHeaders(headers, this.state.project.variables),
+                params: {
+                    query: query.get('query'),
+                    operationName: query.get('operationName'),
+                    variables: query.get('variables')
+                }
+            })
+
+            query = query.merge({
+                title: this.state.operationName,
+                type: 'HISTORY',
+                duration: +moment() - +startTime,
+                endpointId: endpoint.id,
+                operationType: getOperationType({
+                    schema: this.state.schemas.get(endpoint.id),
+                    query: query.get('query'),
+                    operationName: query.get('operationName')
+                })
+            })
+
+            const projectId = this.state.project._id
+
+            mutations.createQuery({
+                projectId,
+                input: writeQuery({
+                    query
+                })
+            }).then(() => {
+                this.fetchQueries({projectId})
+            })
+
+            this.setState({
+                isWaitingForResponse: false,
+                response: JSON.stringify(response, null, 2)
+            })
+        }
+
+        handleTabAdd = () => {
+
+            console.log('add tab')
+        }
+
+        handleTabClick = ({id}) => {
+            this.setState({
+                activeTabId: id
+            })
+        }
+
+        handleTabRemove = ({id}) => {
+            console.log('remove tab ' + id)
         }
 
         handleSaveQuery = () => {
@@ -473,7 +633,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
         handleProjectEdit = () => {
 
-            this.ctrls.projectFormModal.open({
+            this.projectFormModal.open({
                 project: Map({
                     title: this.state.project.title,
                     description: this.state.project.description,
@@ -630,56 +790,14 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                 options.body = JSON.stringify(params)
             }
 
+            console.log({
+                url,
+                method,
+                headers,
+                params
+            })
+
             return fetch(url, options).then(res => res.json())
-        }
-
-        graphQLFetcher = async(params) => {
-
-            let {query} = this.state
-
-            const headers = transformHeaders({
-                headers: query.get('headers')
-            })
-
-            const endpoint = getQueryEndpointOrProjectDefault(query, this.state.project)
-
-            const startTime = moment()
-
-            const response = await this.fetchQuery({
-                url: endpoint.url,
-                method: query.get('method'),
-                headers: applyVariablesToHeaders(headers, this.state.project.variables),
-                params: {
-                    query: query.get('query'),
-                    operationName: query.get('operationName'),
-                    variables: query.get('variables')
-                }
-            })
-
-            query = query.merge({
-                title: this.state.operationName,
-                type: 'HISTORY',
-                duration: +moment() - +startTime,
-                endpointId: endpoint.id,
-                operationType: getOperationType({
-                    schema: this.state.schemas.get(endpoint.id),
-                    query: query.get('query'),
-                    operationName: query.get('operationName')
-                })
-            })
-
-            const projectId = this.state.project._id
-
-            mutations.createQuery({
-                projectId,
-                input: writeQuery({
-                    query
-                })
-            }).then(() => {
-                this.fetchQueries({projectId})
-            })
-
-            return response.data
         }
 
         handleQueryClick = ({id}) => {

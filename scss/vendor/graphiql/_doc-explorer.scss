@@ -1,20 +1,20 @@
-.graphiql-container .doc-explorer {
+.DocExplorerPane .doc-explorer {
   background: #f0f0f0;
 }
 
-.graphiql-container .doc-explorer-title-bar {
+.DocExplorerPane .doc-explorer-title-bar {
   cursor: default;
   display: -webkit-flex;
   display: flex;
-  height: 34px;
+  height: 40px;
   line-height: 14px;
-  padding: 8px 8px 5px;
+  padding: 3px 3px 5px;
   position: relative;
   -webkit-user-select: none;
   user-select: none;
 }
 
-.graphiql-container .doc-explorer-title {
+.DocExplorerPane .doc-explorer-title {
   padding: 10px 0 10px 10px;
   font-weight: bold;
   text-align: center;
@@ -23,10 +23,10 @@
   overflow-x: hidden;
   -webkit-flex: 1;
   flex: 1;
-  height: 34px;
+  height: 40px;
 }
 
-.graphiql-container .doc-explorer-back {
+.DocExplorerPane .doc-explorer-back {
   color: #222222;
   cursor: pointer;
   margin: -7px 0 -6px -8px;
@@ -36,7 +36,7 @@
   white-space: nowrap;
 }
 
-.graphiql-container .doc-explorer-back:before {
+.DocExplorerPane .doc-explorer-back:before {
   border-left: 2px solid #222222;
   border-top: 2px solid #222222;
   content: '';
@@ -49,11 +49,11 @@
   transform: rotate(-45deg);
 }
 
-.graphiql-container .doc-explorer-rhs {
+.DocExplorerPane .doc-explorer-rhs {
   position: relative;
 }
 
-.graphiql-container .doc-explorer-contents {
+.DocExplorerPane .doc-explorer-contents {
   background-color: #ffffff;
   border-top: 1px solid $border-color;
   bottom: 0;
@@ -63,32 +63,32 @@
   padding: 20px 15px;
   position: absolute;
   right: 0;
-  top: 47px;
+  top: 39px;
 }
 
-.graphiql-container .doc-type-description p:first-child ,
-.graphiql-container .doc-type-description blockquote:first-child {
+.DocExplorerPane .doc-type-description p:first-child ,
+.DocExplorerPane .doc-type-description blockquote:first-child {
   margin-top: 0;
 }
 
-.graphiql-container .doc-explorer-contents a {
+.DocExplorerPane .doc-explorer-contents a {
   cursor: pointer;
   text-decoration: none;
 }
 
-.graphiql-container .doc-explorer-contents a:hover {
+.DocExplorerPane .doc-explorer-contents a:hover {
   text-decoration: underline;
 }
 
-.graphiql-container .doc-value-description {
+.DocExplorerPane .doc-value-description {
   padding: 4px 0 8px 12px;
 }
 
-.graphiql-container .doc-category {
+.DocExplorerPane .doc-category {
   margin: 20px 0;
 }
 
-.graphiql-container .doc-category-title {
+.DocExplorerPane .doc-category-title {
   border-bottom: 1px solid #e0e0e0;
   color: #777;
   cursor: default;
@@ -102,46 +102,46 @@
   user-select: none;
 }
 
-.graphiql-container .doc-category-item {
+.DocExplorerPane .doc-category-item {
   margin: 12px 0;
   color: #555;
 }
 
-.graphiql-container .keyword {
+.DocExplorerPane .keyword {
   color: #B11A04;
 }
 
-.graphiql-container .type-name {
+.DocExplorerPane .type-name {
   color: #CA9800;
 }
 
-.graphiql-container .field-name {
+.DocExplorerPane .field-name {
   color: #1F61A0;
 }
 
-.graphiql-container .value-name {
+.DocExplorerPane .value-name {
   color: #0B7FC7;
 }
 
-.graphiql-container .arg-name {
+.DocExplorerPane .arg-name {
   color: #8B2BB9;
 }
 
-.graphiql-container .arg:after {
+.DocExplorerPane .arg:after {
   content: ', ';
 }
 
-.graphiql-container .arg:last-child:after {
+.DocExplorerPane .arg:last-child:after {
   content: '';
 }
 
-.graphiql-container .doc-alert-text {
+.DocExplorerPane .doc-alert-text {
   color: #F00F00;
   font-family: 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace;
   font-size: 13px;
 }
 
-.graphiql-container .search-box-outer {
+.DocExplorerPane .search-box-outer {
   border: 1px solid #d3d6db;
   box-sizing: border-box;
   display: inline-block;
@@ -153,7 +153,7 @@
   width: 100%;
 }
 
-.graphiql-container .search-box-input {
+.DocExplorerPane .search-box-input {
   border: 0;
   font-size: 12px;
   margin: 0;

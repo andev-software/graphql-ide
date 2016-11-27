@@ -8,7 +8,7 @@
 }
 
 .QueryListFilter {
-  height: 48px;
+  height: 40px;
   position: absolute;
   left: 0;
   right: 0;
@@ -17,7 +17,7 @@
   border-bottom: 1px solid $border-color;
 
   .Filter {
-    padding: 11px 13px;
+    padding: 6px 13px;
     width: 100%;
   }
 
@@ -41,7 +41,7 @@
 
 .QueryListContent {
   position: absolute;
-  top: 48px;
+  top: 40px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -50,7 +50,7 @@
 }
 
 .QueryListItem {
-  height: 72px;
+  height: 56px;
   border-bottom: 1px solid #f2f2f2;
   cursor: pointer;
   position: relative;
@@ -75,8 +75,8 @@
   padding: 0 15px 0 13px;
 
   .Icon {
-    width: 39px;
-    height: 39px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background-color: #E10098;
     display: flex;
@@ -85,7 +85,7 @@
 
     span {
       color: #fff;
-      font-size: 16px;
+      font-size: 13px;
       text-transform: uppercase;
       font-weight: 200;
     }

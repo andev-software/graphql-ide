@@ -41,9 +41,20 @@ var options = {
                     plugins: [
                         require.resolve('babel-plugin-transform-class-properties'),
                         require.resolve('babel-plugin-syntax-async-functions'),
-                        require.resolve('babel-plugin-transform-regenerator')
+                        require.resolve('babel-plugin-transform-regenerator'),
+                        require.resolve('babel-plugin-transform-object-rest-spread')
                     ]
                 }
+            },
+            {
+                test: /\.css$/,
+                loader: "style-loader!css-loader"
+            },
+            {
+                test: /\.png$/, loader: "url-loader?limit=100000"
+            },
+            {
+                test: /\.jpg$/, loader: "file-loader"
             }
         ]
     },

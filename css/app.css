@@ -8,6 +8,9 @@
 *::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.08); }
 
+body {
+  overflow: hidden; }
+
 .app-wrapper-main::-webkit-scrollbar-track {
   background-color: #dfdfdf; }
 
@@ -133,7 +136,7 @@
   background-color: #fafafa; }
 
 .QueryListFilter {
-  height: 48px;
+  height: 40px;
   position: absolute;
   left: 0;
   right: 0;
@@ -141,7 +144,7 @@
   background-color: #f0f0f0;
   border-bottom: 1px solid #D4D4D4; }
   .QueryListFilter .Filter {
-    padding: 11px 13px;
+    padding: 6px 13px;
     width: 100%; }
   .QueryListFilter .FilterInput {
     width: 100%;
@@ -159,7 +162,7 @@
 
 .QueryListContent {
   position: absolute;
-  top: 48px;
+  top: 40px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -167,7 +170,7 @@
   overflow-y: auto; }
 
 .QueryListItem {
-  height: 72px;
+  height: 56px;
   border-bottom: 1px solid #f2f2f2;
   cursor: pointer;
   position: relative;
@@ -186,8 +189,8 @@
   margin-top: -1px;
   padding: 0 15px 0 13px; }
   .QueryListItem__Icon .Icon {
-    width: 39px;
-    height: 39px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background-color: #E10098;
     display: flex;
@@ -195,7 +198,7 @@
     align-items: center; }
     .QueryListItem__Icon .Icon span {
       color: #fff;
-      font-size: 18px;
+      font-size: 13px;
       text-transform: uppercase;
       font-weight: 200; }
 
@@ -262,15 +265,6 @@
     width: calc(50% - 100px); }
   .HeaderSection.HeaderSection--center {
     width: 200px; }
-
-.Title {
-  display: inline-block;
-  margin: 0 auto;
-  color: #444;
-  font-size: 18px; }
-  .Title em {
-    font-family: georgia;
-    font-size: 21px; }
 
 .HeaderEditor {
   position: absolute;
@@ -500,6 +494,114 @@
     height: 100%;
     max-width: 200px; }
 
+.Tabs {
+  width: 100%;
+  height: 34px;
+  background: #d0d0d0;
+  overflow: hidden;
+  border-radius: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  border-bottom: 1px solid #b4b4b4; }
+
+.TabElement {
+  position: relative;
+  display: inline-block;
+  background-color: #d0d0d0;
+  color: #222222;
+  padding: 11px 10px;
+  margin: 0;
+  font-size: 11px;
+  transition: background-color 0.25s ease-in-out;
+  align-items: center;
+  cursor: pointer;
+  border-right: 1px solid #b4b4b4; }
+  .TabElement:hover {
+    background-color: #f2f2f2; }
+  .TabElement.active {
+    background-color: #f2f2f2; }
+
+.TabItem {
+  max-width: 200px;
+  min-width: 150px;
+  padding-right: 24px; }
+  .TabItem:hover .Title {
+    background-color: #f2f2f2; }
+  .TabItem.active .Title {
+    background-color: #f2f2f2; }
+  .TabItem .close-icon {
+    position: absolute;
+    top: 11px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 2;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    overflow: hidden;
+    transform: scale(0);
+    transition: transform .08s; }
+    .TabItem .close-icon:hover {
+      background-color: #E10098; }
+      .TabItem .close-icon:hover:before {
+        color: #ffffff; }
+    .TabItem .close-icon:before {
+      font-family: 'FontAwesome';
+      display: inline-block;
+      -webkit-font-smoothing: antialiased;
+      text-decoration: none;
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+      top: 2px;
+      left: 2px;
+      content: "\f00d";
+      position: absolute;
+      text-align: center;
+      line-height: 12px;
+      pointer-events: none; }
+  .TabItem:hover .close-icon {
+    transform: scale(1);
+    transition-duration: .16s; }
+  .TabItem .Title {
+    position: relative;
+    text-align: center;
+    border-bottom: 1px solid transparent;
+    text-overflow: clip;
+    -webkit-mask: linear-gradient(to left, transparent, #000000 1em) no-repeat;
+    background-color: #d0d0d0;
+    background-clip: content-box;
+    backface-visibility: hidden;
+    transition: background-color 0.25s ease-in-out; }
+
+.TabAddButton .add-icon {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  cursor: pointer;
+  z-index: 2;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  overflow: hidden; }
+  .TabAddButton .add-icon:before {
+    font-family: 'FontAwesome';
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+    text-decoration: none;
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+    top: 2px;
+    left: 2px;
+    content: "\f067";
+    position: absolute;
+    text-align: center;
+    line-height: 12px;
+    pointer-events: none; }
+
 .toolbar .toolbar-input {
   background-color: #ffffff;
   border-radius: 3px;
@@ -512,6 +614,12 @@
   .toolbar .toolbar-input:focus {
     border-color: #E10098;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 0 3px rgba(225, 0, 152, 0.1); }
+
+.DocExplorerPane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-left: 1px solid #D4D4D4; }
 
 .truncate-text {
   white-space: nowrap;
