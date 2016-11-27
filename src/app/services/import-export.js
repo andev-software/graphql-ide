@@ -6,6 +6,43 @@ import getDefined from "app/utils/get-defined"
 
 export default (mutations, queries) => {
 
+    function promptSaveDialog() {
+
+        const filename = 'graphiql_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
+        const downloadsPath = remote.app.getPath('downloads')
+
+        return new Promise((resolve, reject) => {
+
+            remote.dialog.showSaveDialog({
+                defaultPath: downloadsPath + '/' + filename,
+                filters: [{
+                    name: 'JSON',
+                    extensions: ['json']
+                }]
+            }, (result) => {
+                resolve(result)
+            })
+        })
+    }
+
+    function saveFile(filePath, data) {
+
+        return new Promise((resolve, reject) => {
+
+            data = JSON.stringify(data, null, 4)
+
+            fs.writeFile(filePath, data, (err, result) => {
+
+                if (err) {
+                    reject(err)
+                    return
+                }
+
+                resolve(result)
+            })
+        })
+    }
+
     function importProject() {
 
         function promptChooseFile() {
@@ -114,71 +151,22 @@ export default (mutations, queries) => {
             })
     }
 
-    function exportProject({projectId}) {
+    async function exportProject({projectId}) {
 
-        let output = {}
+        const project = await queries.findProject({projectId})
 
-        function processProject(projectId) {
-            return queries.findProject({projectId}).then((project) => {
-                output.project = project
+        project.queries = await queries.findProjectQueries({
+            projectId,
+            type: 'COLLECTION'
+        })
+
+        const filePath = await promptSaveDialog()
+
+        if (filePath) {
+            return await saveFile(filePath, {
+                project
             })
         }
-
-        function processQueries(projectId) {
-            return queries.findProjectQueries({
-                projectId,
-                type: 'COLLECTION'
-            }).then(queries => {
-                output.project.queries = queries
-            })
-        }
-
-        function promptSaveDialog() {
-
-            const filename = 'graphiql_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
-            const downloadsPath = remote.app.getPath('downloads')
-
-            return new Promise((resolve, reject) => {
-
-                remote.dialog.showSaveDialog({
-                    defaultPath: downloadsPath + '/' + filename,
-                    filters: [{
-                        name: 'JSON',
-                        extensions: ['json']
-                    }]
-                }, (result) => {
-                    resolve(result)
-                })
-            })
-        }
-
-        function saveFile(filePath) {
-
-            return new Promise((resolve, reject) => {
-
-                const data = JSON.stringify(output, null, 4)
-
-                fs.writeFile(filePath, data, (err, result) => {
-
-                    if (err) {
-                        reject(err)
-                        return
-                    }
-
-                    resolve(result)
-                })
-            })
-        }
-
-        return processProject(projectId)
-            .then(() => processQueries(projectId))
-            .then(promptSaveDialog)
-            .then(filePath => {
-
-                if (filePath) {
-                    return saveFile(filePath)
-                }
-            })
     }
 
     return {

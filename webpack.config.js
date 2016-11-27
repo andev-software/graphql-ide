@@ -6,6 +6,7 @@ var options = {
     // devtool: 'eval-source-map',
     entry: {
         vendor: [
+            'babel-polyfill',
             'react',
             'react-dom',
             'react-router'
@@ -38,7 +39,9 @@ var options = {
                         require.resolve('babel-preset-react')
                     ],
                     plugins: [
-                        require.resolve('babel-plugin-transform-class-properties')
+                        require.resolve('babel-plugin-transform-class-properties'),
+                        require.resolve('babel-plugin-syntax-async-functions'),
+                        require.resolve('babel-plugin-transform-regenerator')
                     ]
                 }
             }
@@ -63,4 +66,4 @@ var options = {
 
 options.target = webpackTargetElectronRenderer(options)
 
-module.exports = options 
+module.exports = options

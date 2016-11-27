@@ -377,7 +377,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                                             onItemRemove={this.handleQueryRemove}
                                         />
                                     </div>
-                                ): null}
+                                ) : null}
                                 <div
                                     className="ProjectDetail__GraphiQL"
                                     style={{
@@ -633,7 +633,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
             return fetch(url, options).then(res => res.json())
         }
 
-        graphQLFetcher = (params) => {
+        graphQLFetcher = async(params) => {
 
             let {query} = this.state
 
@@ -645,7 +645,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
 
             const startTime = moment()
 
-            return this.fetchQuery({
+            const response = await this.fetchQuery({
                 url: endpoint.url,
                 method: query.get('method'),
                 headers: applyVariablesToHeaders(headers, this.state.project.variables),
@@ -654,33 +654,32 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                     operationName: query.get('operationName'),
                     variables: query.get('variables')
                 }
-            }).then(response => {
-
-                query = query.merge({
-                    title: this.state.operationName,
-                    type: 'HISTORY',
-                    duration: +moment() - +startTime,
-                    endpointId: endpoint.id,
-                    operationType: getOperationType({
-                        schema: this.state.schemas.get(endpoint.id),
-                        query: query.get('query'),
-                        operationName: query.get('operationName')
-                    })
-                })
-
-                const projectId = this.state.project._id
-
-                mutations.createQuery({
-                    projectId,
-                    input: writeQuery({
-                        query
-                    })
-                }).then(() => {
-                    this.fetchQueries({projectId})
-                })
-
-                return response.data
             })
+
+            query = query.merge({
+                title: this.state.operationName,
+                type: 'HISTORY',
+                duration: +moment() - +startTime,
+                endpointId: endpoint.id,
+                operationType: getOperationType({
+                    schema: this.state.schemas.get(endpoint.id),
+                    query: query.get('query'),
+                    operationName: query.get('operationName')
+                })
+            })
+
+            const projectId = this.state.project._id
+
+            mutations.createQuery({
+                projectId,
+                input: writeQuery({
+                    query
+                })
+            }).then(() => {
+                this.fetchQueries({projectId})
+            })
+
+            return response.data
         }
 
         handleQueryClick = ({id}) => {
