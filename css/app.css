@@ -136,7 +136,7 @@ body {
   background-color: #fafafa; }
 
 .QueryListFilter {
-  height: 40px;
+  height: 48px;
   position: absolute;
   left: 0;
   right: 0;
@@ -144,7 +144,7 @@ body {
   background-color: #f0f0f0;
   border-bottom: 1px solid #D4D4D4; }
   .QueryListFilter .Filter {
-    padding: 6px 13px;
+    padding: 11px 13px;
     width: 100%; }
   .QueryListFilter .FilterInput {
     width: 100%;
@@ -262,18 +262,16 @@ body {
   flex-grow: 1;
   justify-content: space-around; }
   .HeaderSection.HeaderSection--left, .HeaderSection.HeaderSection--right {
-    width: calc(50% - 100px); }
-  .HeaderSection.HeaderSection--center {
-    width: 200px; }
+    width: 300px; }
 
-.HeaderEditor {
+.TopPane {
   position: absolute;
   right: 0;
   left: 0;
   border-bottom: 1px solid #D4D4D4;
-  background-color: #fafafa; }
+  background-color: #e6e6e6; }
 
-.HeaderEditorBody {
+.TopPaneBody {
   position: absolute;
   top: 0;
   left: 0;
@@ -282,7 +280,7 @@ body {
   padding: 11px 7px 11px 13px;
   overflow-x: hidden;
   overflow-y: scroll; }
-  .HeaderEditorBody .NoHeaders {
+  .TopPaneBody .NoContent {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -291,18 +289,20 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; }
-    .HeaderEditorBody .NoHeaders .NoHeaders__Message {
+    .TopPaneBody .NoContent .NoContent__Message {
       display: inline-block;
       opacity: 0.4; }
 
-.HeaderEditorFooter {
+.TopPaneFooter {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 38px;
   background-color: #f0f0f0;
+  background: -webkit-linear-gradient(#ececec 0%, #ececec 1.9%, #e9e9e9 2%, #d2d2d2 100%);
   border-top: 1px solid #D4D4D4;
+  border-bottom: 1px solid #b4b4b4;
   padding: 6px 13px; }
 
 .HeaderItem {
@@ -329,45 +329,6 @@ body {
     width: 100%;
     background-color: #fff;
     border-radius: 5px; }
-
-.VariableEditor {
-  position: absolute;
-  right: 0;
-  left: 0;
-  border-bottom: 1px solid #D4D4D4;
-  background-color: #fafafa; }
-
-.VariableEditorBody {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 38px;
-  padding: 11px 7px 11px 13px;
-  overflow-x: hidden;
-  overflow-y: scroll; }
-  .VariableEditorBody .NoVariables {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center; }
-    .VariableEditorBody .NoVariables .NoVariables__Message {
-      display: inline-block;
-      opacity: 0.4; }
-
-.VariableEditorFooter {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 38px;
-  background-color: #f0f0f0;
-  border-top: 1px solid #D4D4D4;
-  padding: 6px 13px; }
 
 .VariableItem {
   display: flex;
@@ -491,8 +452,7 @@ body {
   .MenuItem .Label {
     display: flex; }
   .MenuItem .Select {
-    height: 100%;
-    max-width: 200px; }
+    height: 100%; }
 
 .Tabs {
   width: 100%;
@@ -511,7 +471,7 @@ body {
   display: inline-block;
   background-color: #d0d0d0;
   color: #222222;
-  padding: 11px 10px;
+  padding: 9px 10px;
   margin: 0;
   font-size: 11px;
   transition: background-color 0.25s ease-in-out;
@@ -525,7 +485,6 @@ body {
 
 .TabItem {
   max-width: 200px;
-  min-width: 150px;
   padding-right: 24px; }
   .TabItem:hover .Title {
     background-color: #f2f2f2; }
@@ -533,7 +492,7 @@ body {
     background-color: #f2f2f2; }
   .TabItem .close-icon {
     position: absolute;
-    top: 11px;
+    top: 9px;
     right: 10px;
     cursor: pointer;
     z-index: 2;
@@ -574,12 +533,13 @@ body {
     background-color: #d0d0d0;
     background-clip: content-box;
     backface-visibility: hidden;
-    transition: background-color 0.25s ease-in-out; }
+    transition: background-color 0.25s ease-in-out;
+    white-space: nowrap; }
 
 .TabAddButton .add-icon {
   position: absolute;
-  top: 11px;
-  right: 11px;
+  top: 9px;
+  right: 9px;
   cursor: pointer;
   z-index: 2;
   width: 16px;

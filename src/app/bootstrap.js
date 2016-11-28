@@ -4,8 +4,48 @@ export default di => {
         name: 'app',
         dependencies: [
             'app/components/RootView',
+            'app/handlers/setupMenu'
         ],
         factory: require('app').default
+    })
+
+    di.register({
+        name: 'app/handlers/setupMenu',
+        dependencies: [
+            'app/services/store'
+        ],
+        factory: require('app/handlers/setup-menu').default
+    })
+
+    di.register({
+        name: 'app/services/store',
+        dependencies: [
+            'app/reducers/root'
+        ],
+        factory: require('app/services/store').default
+    })
+
+    di.register({
+        name: 'app/reducers/root',
+        dependencies: [
+            'app/reducers/app',
+            'app/reducers/entities'
+        ],
+        factory: require('app/reducers/root').default
+    })
+
+    di.register({
+        name: 'app/reducers/app',
+        dependencies: [
+        ],
+        factory: require('app/reducers/app').default
+    })
+
+    di.register({
+        name: 'app/reducers/entities',
+        dependencies: [
+        ],
+        factory: require('app/reducers/entities').default
     })
 
     di.register({
@@ -18,6 +58,21 @@ export default di => {
         name: 'app/services/database',
         dependencies: [],
         factory: require('app/services/database').default
+    })
+
+    di.register({
+        name: 'app/services/actions',
+        dependencies: [
+            'app/services/store',
+            'app/services/selectors'
+        ],
+        factory: require('app/services/actions').default
+    })
+
+    di.register({
+        name: 'app/services/selectors',
+        dependencies: [],
+        factory: require('app/services/selectors').default
     })
 
     di.register({
@@ -160,8 +215,8 @@ export default di => {
     di.register({
         name: 'app/components/projectDetail/ProjectDetail',
         dependencies: [
-            'app/services/mutations',
-            'app/services/queries',
+            'app/services/actions',
+            'app/services/selectors',
             'app/services/history',
             'app/components/loader/Loader',
             'app/components/layout/Layout',
@@ -180,8 +235,8 @@ export default di => {
     di.register({
         name: 'app/components/projectList/ProjectList',
         dependencies: [
-            'app/services/mutations',
-            'app/services/queries',
+            'app/services/actions',
+            'app/services/selectors',
             'app/services/importExport',
             'app/services/history',
             'app/components/layout/Layout',
@@ -225,6 +280,7 @@ export default di => {
     di.register({
         name: 'app/components/RootView',
         dependencies: [
+            'app/services/store',
             'app/components/RouterView'
         ],
         factory: require('app/components/root-view').default

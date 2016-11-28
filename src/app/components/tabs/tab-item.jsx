@@ -14,6 +14,7 @@ export default () => {
                     })}
                     onClick={this.handleClick}
                     style={{
+                        width: this.props.width,
                         maxWidth: this.props.maxWidth
                     }}
                 >
@@ -38,6 +39,8 @@ export default () => {
         }
 
         handleRemove = (e) => {
+
+            e.stopPropagation()
 
             this.props.onRemove({
                 id: this.props.id,

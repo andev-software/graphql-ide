@@ -7,3 +7,4 @@
 - Remove unnecessary buttons
 - Create menu items for frequently used actions
 - Setup command palette
+- Schema updated at + refresh / save button

@@ -2,6 +2,7 @@ const electron = require('electron')
 // Module to control application life.
 const app = electron.app
 const Menu = electron.Menu
+const ipcMain = electron.ipcMain
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
@@ -50,128 +51,6 @@ function createWindow() {
 
     if (process.env.NODE_ENV === 'development') {
         mainWindow.openDevTools()
-    }
-
-    if (process.platform === 'darwin') {
-        template = [{
-            label: 'GraphiQL',
-            submenu: [{
-                label: 'About GraphiQL',
-                selector: 'orderFrontStandardAboutPanel:'
-            }, {
-                type: 'separator'
-            }, {
-                label: 'Services',
-                submenu: []
-            }, {
-                type: 'separator'
-            }, {
-                label: 'Hide GraphiQL',
-                accelerator: 'Command+H',
-                selector: 'hide:'
-            }, {
-                label: 'Hide Others',
-                accelerator: 'Command+Shift+H',
-                selector: 'hideOtherApplications:'
-            }, {
-                label: 'Show All',
-                selector: 'unhideAllApplications:'
-            }, {
-                type: 'separator'
-            }, {
-                label: 'Quit',
-                accelerator: 'Command+Q',
-                click: function () {
-                    app.quit()
-                }
-            }]
-        }, {
-            label: 'Edit',
-            submenu: [{
-                label: 'Cut',
-                accelerator: 'Command+X',
-                selector: 'cut:'
-            }, {
-                label: 'Copy',
-                accelerator: 'Command+C',
-                selector: 'copy:'
-            }, {
-                label: 'Paste',
-                accelerator: 'Command+V',
-                selector: 'paste:'
-            }, {
-                label: 'Select All',
-                accelerator: 'Command+A',
-                selector: 'selectAll:'
-            }]
-        }, {
-            label: 'View',
-            submenu: [{
-                label: 'Reload',
-                accelerator: 'Command+R',
-                click: function () {
-                    mainWindow.reload()
-                }
-            }, {
-                label: 'Toggle Full Screen',
-                accelerator: 'Ctrl+Command+F',
-                click: function () {
-                    mainWindow.setFullScreen(!mainWindow.isFullScreen())
-                }
-            }, {
-                label: 'Toggle Developer Tools',
-                accelerator: 'Alt+Command+I',
-                click: function () {
-                    mainWindow.toggleDevTools()
-                }
-            }, {
-                role: 'resetzoom'
-            }, {
-                role: 'zoomin'
-            }, {
-                role: 'zoomout'
-            }]
-        }, {
-            label: 'Window',
-            submenu: [{
-                label: 'Minimize',
-                accelerator: 'Command+M',
-                selector: 'performMiniaturize:'
-            }, {
-                type: 'separator'
-            }, {
-                label: 'Bring All to Front',
-                selector: 'arrangeInFront:'
-            }]
-        }]
-
-        menu = Menu.buildFromTemplate(template)
-        Menu.setApplicationMenu(menu)
-    } else {
-        template = [{
-            label: '&View',
-            submenu: [{
-                label: '&Reload',
-                accelerator: 'Ctrl+R',
-                click: function () {
-                    mainWindow.restart()
-                }
-            }, {
-                label: 'Toggle &Full Screen',
-                accelerator: 'F11',
-                click: function () {
-                    mainWindow.setFullScreen(!mainWindow.isFullScreen())
-                }
-            }, {
-                label: 'Toggle &Developer Tools',
-                accelerator: 'Alt+Ctrl+I',
-                click: function () {
-                    mainWindow.toggleDevTools()
-                }
-            }]
-        }]
-        menu = Menu.buildFromTemplate(template)
-        mainWindow.setMenu(menu)
     }
 }
 

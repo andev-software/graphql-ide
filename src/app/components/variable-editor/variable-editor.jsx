@@ -1,5 +1,4 @@
 import React from "react"
-import reduce from "lodash/reduce"
 import {Map, List} from "immutable"
 
 export default (VariableItem) => {
@@ -22,18 +21,8 @@ export default (VariableItem) => {
         }
 
         computeVariables(props) {
-
-            const variables = reduce(props.variables, (result, value, key) => {
-
-                return result.push(Map({
-                    key,
-                    value
-                }))
-
-            }, List())
-
             this.setState({
-                variables
+                variables: props.variables
             })
         }
 
@@ -43,7 +32,7 @@ export default (VariableItem) => {
 
             return (
                 <div
-                    className="VariableEditor"
+                    className="VariableEditor TopPane"
                     style={{
                         top: this.props.top,
                         width: this.props.width,
@@ -51,7 +40,7 @@ export default (VariableItem) => {
                     }}
                 >
                     {this.state.variables.size ? (
-                        <div className="VariableEditorBody">
+                        <div className="VariableEditorBody TopPaneBody">
                             {this.state.variables.map((variable, index) => (
                                 <VariableItem
                                     key={index}
@@ -64,15 +53,15 @@ export default (VariableItem) => {
                             )).toArray()}
                         </div>
                     ) : (
-                        <div className="VariableEditorBody">
-                            <div className="NoVariables">
-                                <div className="NoVariables__Message">
+                        <div className="VariableEditorBody TopPaneBody">
+                            <div className="NoContent">
+                                <div className="NoContent__Message">
                                     No variables (yet)
                                 </div>
                             </div>
                         </div>
                     )}
-                    <div className="VariableEditorFooter">
+                    <div className="VariableEditorFooter TopPaneFooter">
                         <div className="Menu--horizontal Menu--right">
                             <div className="MenuItem">
                                 <button
@@ -135,13 +124,8 @@ export default (VariableItem) => {
 
         emitChanges() {
 
-            const variables = this.state.variables.reduce((result, variable) => {
-                result[variable.get('key')] = variable.get('value')
-                return result
-            }, {})
-
             this.props.onChange({
-                variables
+                variables: this.state.variables
             })
         }
     }

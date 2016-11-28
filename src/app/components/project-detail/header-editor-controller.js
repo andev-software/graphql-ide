@@ -5,12 +5,13 @@ export default (delegate) => {
 
     return {
         getHeaders: () => {
-            return delegate.state.query.get('headers')
+            return delegate.props.project.get('headers')
         },
-        handleAddClick: ({e}) => {
+        handleAddClick: () => {
 
-            delegate.setState({
-                query: delegate.state.query.update('headers', headers => {
+            delegate.props.updateProject({
+                id: delegate.props.project.get('id'),
+                data: delegate.props.project.get('source').update('headers', headers => {
 
                     return headers.push(Map({
                         id: uuid.v4(),
@@ -23,8 +24,9 @@ export default (delegate) => {
 
         handleChange: ({id, header}) => {
 
-            delegate.setState({
-                query: delegate.state.query.update('headers', headers => {
+            delegate.props.updateProject({
+                id: delegate.props.project.get('id'),
+                data: delegate.props.project.get('source').update('headers', headers => {
 
                     return headers.map(existingHeader => {
 
@@ -40,8 +42,10 @@ export default (delegate) => {
 
         handleRemove: ({id}) => {
 
-            delegate.setState({
-                query: delegate.state.query.update('headers', headers => {
+
+            delegate.props.updateProject({
+                id: delegate.props.project.get('id'),
+                data: delegate.props.project.get('source').update('headers', headers => {
 
                     return headers.filter(header => {
                         return header.get('id') !== id
@@ -50,10 +54,11 @@ export default (delegate) => {
             })
         },
 
-        handleClear: ({e}) => {
+        handleClear: () => {
 
-            delegate.setState({
-                query: delegate.state.query.set('headers', List())
+            delegate.props.updateProject({
+                id: delegate.props.project.get('id'),
+                data: delegate.props.project.get('source').set('headers', List())
             })
         }
     }

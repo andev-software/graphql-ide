@@ -8,7 +8,7 @@ export default (HeaderItem) => {
 
             return (
                 <div
-                    className="HeaderEditor"
+                    className="HeaderEditor TopPane"
                     style={{
                         top: this.props.top,
                         width: this.props.width,
@@ -16,7 +16,7 @@ export default (HeaderItem) => {
                     }}
                 >
                     {this.props.headers.size ? (
-                        <div className="HeaderEditorBody">
+                        <div className="HeaderEditorBody TopPaneBody">
                             {this.props.headers.map((header, index) => (
                                 <HeaderItem
                                     key={index}
@@ -27,15 +27,15 @@ export default (HeaderItem) => {
                             )).toArray()}
                         </div>
                     ) : (
-                        <div className="HeaderEditorBody">
-                            <div className="NoHeaders">
-                                <div className="NoHeaders__Message">
+                        <div className="HeaderEditorBody TopPaneBody">
+                            <div className="NoContent">
+                                <div className="NoContent__Message">
                                     No headers (yet)
                                 </div>
                             </div>
                         </div>
                     )}
-                    <div className="HeaderEditorFooter">
+                    <div className="HeaderEditorFooter TopPaneFooter">
                         <div className="Menu--horizontal Menu--right">
                             <div className="MenuItem">
                                 <button

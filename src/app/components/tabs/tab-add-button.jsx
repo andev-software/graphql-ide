@@ -18,5 +18,11 @@ export default () => {
                 </li>
             )
         }
+
+        handleClick = (e) => {
+            this.props.onClick({
+                e
+            })
+        }
     }
 }

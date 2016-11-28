@@ -62,8 +62,6 @@ export default () => {
 
         render() {
 
-            console.log('render', this.props)
-
             return (
                 <div className="graphiql-container">
                     <div className="editorWrap">

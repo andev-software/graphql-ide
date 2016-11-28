@@ -3,33 +3,23 @@ import createModal from "app/utils/create-modal"
 import electron from "electron"
 import {Map, List} from "immutable"
 import moment from "moment"
+import {connect} from "react-redux"
+import {bindActionCreators} from "redux"
 
-export default (mutations, queries, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
+export default (actions, selectors, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
-    return class ProjectList extends React.Component {
+    const mapStateToProps = (state, props) => ({
+        projects: selectors.allProjects(state)
+    })
 
-        state = {
-            projects: []
-        }
+    const mapDispatchToProps = dispatch => bindActionCreators(actions, dispatch)
+
+    class ProjectList extends React.Component {
 
         ctrls = {
             projectFormModal: null
-        }
-
-        componentDidMount() {
-            this.fetchProjects()
-        }
-
-        fetchProjects() {
-
-            queries.allProjects().then(projects => {
-
-                this.setState({
-                    projects
-                })
-            })
         }
 
         render() {
@@ -51,14 +41,6 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                             onClick={item.onClick}
                         />
                     ))}
-                </div>
-            )
-
-            const headerCenter = (
-                <div className="Title">
-                    <span>
-                        Graph<em>i</em>QL App
-                    </span>
                 </div>
             )
 
@@ -96,7 +78,6 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                                 width={width}
                                 height={HEADER_HEIGHT}
                                 left={headerLeft}
-                                center={headerCenter}
                                 right={headerRight}
                             />
                             <div
@@ -124,22 +105,22 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                                                 onClick={this.handleNewClick}
                                             />
                                         </div>
-                                        {this.state.projects.map(project => (
-                                            <div key={project._id} className="col-sm-6 col-md-4">
+                                        {this.props.projects.map(project => (
+                                            <div key={project.get('id')} className="col-sm-6 col-md-4">
                                                 <ProjectListItem
-                                                    id={project._id}
+                                                    id={project.get('id')}
                                                     backgroundColor="#E10098"
                                                     color="#fff"
-                                                    shortname={(project.title || "").substring(0, 2)}
-                                                    title={project.title}
-                                                    description={project.description}
-                                                    meta={moment(project.updatedAt).format('DD/MM/YYYY HH:mm')}
+                                                    shortname={(project.get('title') || "").substring(0, 2)}
+                                                    title={project.get('title')}
+                                                    description={project.get('description')}
+                                                    meta={moment(project.get('updatedAt')).format('DD/MM/YYYY HH:mm')}
                                                     onClick={this.handleClick}
                                                     onRemove={this.handleRemove}
                                                     onExport={this.handleProjectExport}
                                                 />
                                             </div>
-                                        ))}
+                                        )).toArray()}
                                     </div>
                                 </div>
                             </div>
@@ -183,20 +164,20 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                 project: Map({
                     title: '',
                     description: '',
-                    endpoints: List()
+                    environments: List()
                 })
             })
                 .then(result => {
 
                     if (result.status === 'SAVE') {
 
-                        mutations.createProject({
-                            input: result.payload.input.toJSON()
-                        }).then(() => {
-                            this.fetchProjects()
+                        this.props.createProject({
+                            data: result.payload.input
                         })
                     }
                 })
         }
     }
+
+    return connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ProjectList)
 }

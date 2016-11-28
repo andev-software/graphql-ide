@@ -18,10 +18,6 @@
 
   &.HeaderSection--left,
   &.HeaderSection--right {
-    width: calc(50% - 100px);
-  }
-
-  &.HeaderSection--center {
-    width: 200px;
+    width: 300px
   }
 }

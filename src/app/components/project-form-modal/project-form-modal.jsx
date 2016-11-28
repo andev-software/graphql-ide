@@ -13,12 +13,12 @@ export default (EndpointsEditor) => {
             changed: Map({
                 title: false,
                 description: false,
-                endpoints: false
+                environments: false
             }),
             project: Map({
                 title: '',
                 description: '',
-                endpoints: List()
+                environments: List()
             })
         }
 
@@ -52,7 +52,9 @@ export default (EndpointsEditor) => {
 
             const title = this.state.project.get('title')
             const description = this.state.project.get('description')
-            const endpoints = this.state.project.get('endpoints')
+            const environments = this.state.project.get('environments')
+
+            console.log('state', this.state.project, environments)
 
             const checks = [() => {
 
@@ -84,10 +86,10 @@ export default (EndpointsEditor) => {
 
             }, () => {
 
-                if (endpoints.isEmpty()) {
+                if (environments.isEmpty()) {
                     return Map({
-                        name: 'endpoints',
-                        message: `You need to have at least on endpoint configured`
+                        name: 'environments',
+                        message: `You need to have at least one environment configured`
                     })
                 }
             }]
@@ -163,13 +165,13 @@ export default (EndpointsEditor) => {
                                 />
                             </FormGroup>
                             <FormGroup
-                                controlId="endpoints"
-                                validationState={this.getValidationState('endpoints')}
+                                controlId="environments"
+                                validationState={this.getValidationState('environments')}
                             >
                                 <ControlLabel>Endpoints</ControlLabel>
                                 <EndpointsEditor
-                                    endpoints={this.state.project.get('endpoints')}
-                                    onChange={this.handleEndpointsChange}
+                                    endpoints={this.state.project.get('environments')}
+                                    onChange={this.handleEnvironmentChange}
                                 />
                             </FormGroup>
                         </Modal.Body>
@@ -200,10 +202,10 @@ export default (EndpointsEditor) => {
             })
         }
 
-        handleEndpointsChange = ({endpoints}) => {
+        handleEnvironmentChange = ({endpoints}) => {
 
             this.updateProjectProperty({
-                property: 'endpoints',
+                property: 'environments',
                 value: endpoints
             })
         }

@@ -1,21 +1,15 @@
-export default (delegate, mutations) => {
+export default (delegate) => {
 
     return {
         getVariables: () => {
-            return delegate.state.project.variables
+            return delegate.props.project.get('variables')
         },
         handleChange: ({variables}) => {
 
-            let {project} = delegate.state
-
-            project = Object.assign({}, project, {
-                variables
+            delegate.props.updateProject({
+                id: delegate.props.project.get('id'),
+                data: delegate.props.project.get('source').set('variables', variables)
             })
-
-            mutations.updateProject({
-                projectId: project._id,
-                input: project
-            }).then(delegate.fetchProject({projectId: project._id}))
         }
     }
 }
