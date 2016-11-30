@@ -1,12 +1,16 @@
-import Datastore from "nedb"
-import electron from "electron"
+import Knex from "knex"
 
 export default () => {
 
-    const dataPath = electron.remote.app.getPath('userData')
-
-    return {
-        projects: new Datastore({ filename: dataPath + '/projects', autoload: true }),
-        queries: new Datastore({ filename: dataPath + '/queries', autoload: true })
-    }
+    const db = Knex({
+        client: 'mysql',
+        connection: {
+            host: '127.0.0.1',
+            user: 'root',
+            password: 'root',
+            database: 'graphql_ide',
+            timezone: 'UTC'
+        }
+    })
+    return db
 }

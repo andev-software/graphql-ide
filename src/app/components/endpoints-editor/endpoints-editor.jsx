@@ -99,7 +99,8 @@ export default (EndpointItem) => {
                     id: uuid.v4(),
                     title: 'Default',
                     url: '',
-                    isDefault: firstDefault
+                    isDefault: firstDefault,
+                    variables: List()
                 }))
             }, () => this.emitChanges())
         }

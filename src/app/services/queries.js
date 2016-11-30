@@ -1,73 +1,63 @@
-export default (db) => {
+import {fromJS} from "immutable"
+
+export default (graphql, fragments) => {
 
     function allProjects() {
 
-        return new Promise((resolve, reject) => {
-
-            db.projects.find({}).sort({updatedAt: -1}).exec((err, results) => {
-
-                if (err) {
-                    reject(err)
-                    return
+        return graphql.query(`
+            query {
+                viewer {
+                    allProjects {
+                        ...${fragments.project}
+                    }
                 }
-
-                resolve(results)
-            })
-        })
+            }
+        `)
+            .then(r => fromJS(r))
+            .then(r => r.getIn(['viewer', 'allProjects']))
     }
 
-    function findProject({projectId}) {
+    function findProject(variables) {
 
-        return new Promise((resolve, reject) => {
-
-            db.projects.findOne({_id: projectId}, {}, (err, result) => {
-
-                if (err) {
-                    reject(err)
-                    return
+        return graphql.query(`
+            query {
+                viewer {
+                    findProject(id: ${variables.id}) {
+                        id
+                        title
+                        selectedTab {
+                            ...${fragments.queryTab}
+                            query {
+                                ...${fragments.fullHistoryQuery}
+                                ...${fragments.fullSavedQuery}
+                            }
+                        }
+                        queryTabs {
+                            ...${fragments.queryTab}
+                            query {
+                                ...${fragments.historyQuery}
+                                ...${fragments.savedQuery}
+                            }
+                        }
+                        environments {
+                            ...${fragments.environment}
+                        }
+                        historyQueries {
+                            ...${fragments.historyQuery}
+                        }
+                        savedQueries {
+                            ...${fragments.savedQuery}
+                        }
+                    }
                 }
-
-                resolve(result)
-            })
-        })
-    }
-
-    function findProjectQueries({projectId, type}) {
-
-        return new Promise((resolve, reject) => {
-
-            db.queries.find({projectId: projectId, type: type}).sort({createdAt: -1}).exec((err, results) => {
-
-                if (err) {
-                    reject(err)
-                    return
-                }
-
-                resolve(results)
-            })
-        })
-    }
-
-    function findQuery({queryId}) {
-
-        return new Promise((resolve, reject) => {
-
-            db.queries.findOne({_id: queryId}, {}, (err, result) => {
-
-                if (err) {
-                    reject(err)
-                    return
-                }
-
-                resolve(result)
-            })
-        })
+            }
+        `)
+            .then(fromJS)
+            .then(r => r.getIn(['viewer', 'findProject']))
     }
 
     return {
         allProjects,
-        findProject,
-        findProjectQueries,
-        findQuery
+        findProject
     }
 }

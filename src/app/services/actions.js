@@ -4,6 +4,34 @@ import {fromJS, Map} from "immutable"
 
 export default (store, selectors) => {
     return {
+        projectRemoveHistoryRequest: ({projectId, id}) => {
+
+            const project = selectors.findProject(store.getState(), {projectId})
+
+            return {
+                type: 'UPDATE_PROJECT',
+                payload: {
+                    id: projectId,
+                    data: project.get('source').update('requestHistory', history => {
+                        return history.filter(request => request.get('id') !== id)
+                    })
+                }
+            }
+        },
+        projectCreateHistoryRequest: ({projectId, request}) => {
+
+            const project = selectors.findProject(store.getState(), {projectId})
+
+            return {
+                type: 'UPDATE_PROJECT',
+                payload: {
+                    id: projectId,
+                    data: project.get('source').update('requestHistory', history => {
+                        return history.push(request)
+                    })
+                }
+            }
+        },
         createProject: ({data}) => {
 
             const id = uuid.v4()
@@ -16,12 +44,13 @@ export default (store, selectors) => {
                         id: id,
                         updatedAt: moment().utc().toISOString(),
                         createdAt: moment().utc().toISOString(),
-                        variables: [],
                         headers: [],
                         selectedEnvironmentId: null,
                         environments: [],
                         selectedTabId: null,
                         tabs: [],
+                        requestCollection: [],
+                        requestHistory: [],
                         settings: {
                             queryMethod: 'POST',
                             topPane: {
@@ -74,7 +103,6 @@ export default (store, selectors) => {
                     data: project.get('source').update('tabs', tabs => {
                         return tabs.push(Map({
                             id: tabId,
-                            title: 'New query',
                             request: Map({
                                 id: uuid.v4(),
                                 query: '',

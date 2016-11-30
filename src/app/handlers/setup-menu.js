@@ -99,42 +99,42 @@ export default (store) => {
                         label: 'Collection',
                         accelerator: 'Command+1',
                         click: () => {
-                            console.log('test123')
+                            console.log('collection')
                         }
                     }, {
                         type: 'checkbox',
                         label: 'History',
                         accelerator: 'Command+2',
                         click: () => {
-                            console.log('test123')
+                            console.log('history')
                         }
                     }, {
                         type: 'checkbox',
                         label: 'Documentation',
                         accelerator: 'Command+3',
                         click: () => {
-                            console.log('test123')
+                            console.log('documentaion')
                         }
                     }, {
                         type: 'checkbox',
                         label: 'Query variables',
                         accelerator: 'Command+4',
                         click: () => {
-                            console.log('test123')
+                            console.log('query variables')
                         }
                     }, {
                         type: 'checkbox',
                         label: 'Variables',
                         accelerator: 'Command+5',
                         click: () => {
-                            console.log('test123')
+                            console.log('variables')
                         }
                     }, {
                         type: 'checkbox',
                         label: 'Headers',
                         accelerator: 'Command+6',
                         click: () => {
-                            console.log('test123')
+                            console.log('headers')
                         }
                     }]
                 }, {

@@ -1,20 +1,18 @@
 import React from "react"
 import createModal from "app/utils/create-modal"
 import electron from "electron"
-import {Map, List} from "immutable"
+import {fromJS, Map, List} from "immutable"
 import moment from "moment"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
 
-export default (actions, selectors, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
+export default (queries, importExport, history, view, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
-    const mapStateToProps = (state, props) => ({
-        projects: selectors.allProjects(state)
+    const mapResolversToProps = () => ({
+        projects: queries.allProjects()
     })
-
-    const mapDispatchToProps = dispatch => bindActionCreators(actions, dispatch)
 
     class ProjectList extends React.Component {
 
@@ -23,6 +21,8 @@ export default (actions, selectors, importExport, history, Layout, WorkspaceHead
         }
 
         render() {
+
+            console.log('this.props', this.props)
 
             const HEADER_HEIGHT = 40
 
@@ -179,5 +179,5 @@ export default (actions, selectors, importExport, history, Layout, WorkspaceHead
         }
     }
 
-    return connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ProjectList)
+    return view(mapResolversToProps)(ProjectList)
 }

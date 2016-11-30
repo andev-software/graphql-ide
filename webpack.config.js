@@ -1,15 +1,13 @@
 var path = require('path')
 var webpack = require('webpack')
 var webpackTargetElectronRenderer = require('webpack-target-electron-renderer')
+var nodeExternals = require('webpack-node-externals');
 
 var options = {
     // devtool: 'eval-source-map',
     entry: {
         vendor: [
-            'babel-polyfill',
-            'react',
-            'react-dom',
-            'react-router'
+            'babel-polyfill'
         ],
         app: [
             './src/index.jsx'
@@ -23,6 +21,11 @@ var options = {
         root: path.resolve(__dirname) + '/src',
         extensions: ['', '.webpack.js', '.web.js', '.js', '.jsx']
     },
+    externals: [nodeExternals({
+        whitelist: [
+            'babel-polyfill'
+        ]
+    })],
     module: {
         loaders: [
             {

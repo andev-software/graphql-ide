@@ -1,12 +1,14 @@
 import React from "react"
 import ReactList from "react-list"
+import {List} from "immutable"
 
 export default (QueryListItem) => {
 
     return class QueryList extends React.Component {
 
         state = {
-            query: ''
+            query: '',
+            data: List()
         }
 
         componentWillMount() {

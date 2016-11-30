@@ -1,14 +1,9 @@
 import React from 'react'
-import electron from "electron"
 import moment from "moment"
-import uuid from "uuid"
-import {introspectionQuery, buildClientSchema, print, parse} from 'graphql'
-import {Map, List} from "immutable"
+import {print, parse} from 'graphql'
+import {fromJS, Map, List} from "immutable"
 import VariableEditorController from "./variable-editor-controller"
 import HeaderEditorController from "./header-editor-controller"
-import reduce from "lodash/reduce"
-import forEach from "lodash/forEach"
-import get from "lodash/get"
 import createModal from "app/utils/create-modal"
 import querystring from "querystring"
 import omitBy from "lodash/omitBy"
@@ -18,6 +13,11 @@ import merge from "lodash/merge"
 import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
+import uuid from "uuid"
+import getOperationType from "app/utils/get-operation-type"
+import getQueryFacts from 'graphiql/dist/utility/getQueryFacts';
+import debounce from 'graphiql/dist/utility/debounce';
+import get from "lodash/get"
 
 const DEFAULT_GET_HEADERS = {}
 
@@ -25,18 +25,7 @@ const DEFAULT_POST_HEADERS = {
     'content-type': 'application/json'
 }
 
-const NEW_QUERY = Map({
-    method: 'POST',
-    query: '',
-    operationName: '',
-    variables: '',
-    headers: List()
-})
-
-function applyVariablesToHeaders(project) {
-
-    const headers = project.get('headers')
-    const variables = project.get('variables')
+function createHeaders(headers, variables) {
 
     return headers.reduce((result, header) => {
 
@@ -55,23 +44,13 @@ function applyVariablesToHeaders(project) {
     }, {})
 }
 
-function transformHeaders({headers}) {
-
-    return headers.reduce((result, header) => {
-        result[header.get('key')] = header.get('value')
-        return result
-    }, {})
-}
-
-export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, MenuItem, VariableEditor, HeaderEditor, QueryList, Tabs, GraphiQL, ProjectFormModal) => {
+export default (queries, mutations, selectors, history, view, Layout, WorkspaceHeader, MenuItem, VariableEditor, HeaderEditor, QueryList, Tabs, GraphiQL, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
-    const mapStateToProps = (state, props) => ({
-        project: selectors.findProject(state, {projectId: props.params.id})
+    const mapQueriesToProps = (props) => ({
+        project: queries.findProject({id: props.params.id})
     })
-
-    const mapDispatchToProps = dispatch => bindActionCreators(actions, dispatch)
 
     class ProjectDetail extends React.Component {
 
@@ -81,103 +60,35 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
             this.headerEditorController = HeaderEditorController(this)
         }
 
-        componentDidMount() {
-            if (this.props.project) {
-                this.ensureData(this.props)
-            }
-        }
-
-        componentDidUpdate(prevProps) {
-
-            if (!prevProps.project && this.props.project || prevProps.project && this.props.project && prevProps.project.get('id') !== this.props.project.get('id')) {
-                this.ensureData()
-            }
-        }
-
-        ensureData() {
-
-            const promises = this.props.project
-                .get('environments')
-                .filter(env => !env.get('schema'))
-                .map(env => {
-
-                    return this.fetchQuery({
-                        url: env.get('url'),
-                        method: 'POST',
-                        params: {
-                            query: introspectionQuery
-                        }
-                    }).then(response => {
-                        this.updateEnvironment(env.get('id'), env => {
-                            return env
-                                .setIn(['schema', 'updatedAt'], moment().utc().toISOString())
-                                .setIn(['schema', 'response'], JSON.stringify(response, null, 2))
-                        })
-                    })
-                })
-
-            Promise.all(promises)
-        }
-
-        fetchSchema(environment) {
-
-            return this.fetchQuery({
-                url: environment.url,
-                method: 'POST',
-                headers: {},
-                params: {
-                    query: introspectionQuery
-                }
-            }).then(response => {
-
-                this.setState({
-                    schemas: this.state.schemas.set(environment.id, buildClientSchema(response.data))
-                })
-            }).catch(e => {
-
-                let errors = get(e, 'response.data.errors')
-
-                errors = errors ? errors.map(error => `• ${error.message}\n`) : null
-
-                electron.remote.dialog.showErrorBox(`Exception - ${e.toString()}`, `Unable to fetch schema for '${environment.url}'\n\n ${errors}`)
-            })
-        }
-
         render() {
 
-            if (!this.props.project) {
-
-                return (
-                    <Loader
-                        message="Loading project details"
-                    />
-                )
-            }
-
-            const environment = this.props.project.get('selectedEnvironment')
-
             const projectId = this.props.project.get('id')
-            const leftPaneState = this.props.project.getIn(['settings', 'leftPane', 'state'])
+            const selectedTab = this.props.project.get('selectedTab')
 
             const buttonsLeft = [{
                 description: 'Back',
                 onClick: () => history.push('/project-list')
             }, {
                 description: 'Collection',
-                active: leftPaneState === 'COLLECTION',
+                active: this.props.project.get('leftPane') === 'COLLECTION',
                 onClick: () => {
                     this.props.updateProject({
                         id: projectId,
-                        data: this.props.project.get('source').setIn(['settings', 'leftPane', 'state'], leftPaneState === 'COLLECTION' ? null : 'COLLECTION')
+                        data: {
+                            id: projectId,
+                            leftPane: this.props.project.get('leftPane') === 'COLLECTION' ? null : 'COLLECTION'
+                        }
                     })
                 }
             }, {
                 description: 'History',
-                active: leftPaneState === 'HISTORY',
+                active: this.props.project.get('leftPane') === 'HISTORY',
                 onClick: () => {
                     this.props.updateProject({
-                        id: projectId,
-                        data: this.props.project.get('source').setIn(['settings', 'leftPane', 'state'], leftPaneState === 'HISTORY' ? null : 'HISTORY')
+                        data: {
+                            id: projectId,
+                            leftPane: this.props.project.get('leftPane') === 'HISTORY' ? null : 'HISTORY'
+                        }
                     })
                 }
             }]
@@ -196,37 +107,38 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                 </div>
             )
 
-            const topPaneState = this.props.project.getIn(['settings', 'topPane', 'state'])
-            const rightPaneState = this.props.project.getIn(['settings', 'rightPane', 'state'])
-
             const buttonsRight = [{
                 description: 'Settings',
                 onClick: this.handleProjectEdit
             }, {
                 description: 'Variables',
-                active: topPaneState === 'VARIABLES',
+                active: this.props.project.get('topPane') === 'VARIABLES',
                 onClick: () => {
                     this.props.updateProject({
-                        id: projectId,
-                        data: this.props.project.get('source').setIn(['settings', 'topPane', 'state'], topPaneState === 'VARIABLES' ? null : 'VARIABLES')
+                        data: {
+                            id: projectId,
+                            topPane: this.props.project.get('topPane') === 'VARIABLES' ? null : 'VARIABLES'
+                        }
                     })
                 }
             }, {
                 description: 'Headers',
-                active: topPaneState === 'HEADERS',
+                active: this.props.project.get('topPane') === 'HEADERS',
                 onClick: () => {
                     this.props.updateProject({
-                        id: projectId,
-                        data: this.props.project.get('source').setIn(['settings', 'topPane', 'state'], topPaneState === 'HEADERS' ? null : 'HEADERS')
+                        data: {
+                            id: projectId,
+                            topPane: this.props.project.get('topPane') === 'HEADERS' ? null : 'HEADERS'
+                        }
                     })
                 }
             }, {
                 description: 'Docs',
-                active: rightPaneState === 'DOCS',
+                active: this.props.project.get('rightPane') === 'DOCS',
                 onClick: () => {
                     this.props.updateProject({
                         id: projectId,
-                        data: this.props.project.get('source').setIn(['settings', 'rightPane', 'state'], rightPaneState === 'DOCS' ? null : 'DOCS')
+                        rightPane: this.props.project.get('rightPane') === 'DOCS' ? null : 'DOCS'
                     })
                 }
             }]
@@ -247,11 +159,11 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
 
             const buttonsCenter = [{
                 description: 'Run',
-                disabled: !this.props.project.get('selectedTab'),
+                disabled: !selectedTab,
                 onClick: () => this.runQuery()
             }, {
                 description: 'Prettify',
-                disabled: !this.props.project.get('selectedTab'),
+                disabled: !selectedTab,
                 onClick: () => this.handlePrettifyQuery()
             }]
 
@@ -275,35 +187,11 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                 </div>
             )
 
-            let queries = List()
-
-            switch (leftPaneState) {
-                case 'COLLECTION':
-                    queries = this.props.project.get('collectionQueries')
-                    break
-                case 'HISTORY':
-                    queries = this.props.project.get('historyQueries')
-                    break
-            }
-
-            const selectedTab = this.props.project.get('selectedTab')
-
-            let schema = null
-
-            if (environment.hasIn(['schema', 'response'])) {
-                const schemaResponse = JSON.parse(environment.getIn(['schema', 'response']))
-                schema = buildClientSchema(schemaResponse.data)
-            }
-
-            console.log({
-                schema
-            })
-
             const HEADER_HEIGHT = 40
             const TABS_HEIGHT = 34
-            const PANEL_HEIGHT = topPaneState !== null ? 200 : 0
-            const DRAWER_WIDTH = leftPaneState !== null ? 350 : 0
-            const DOC_EXPLORER_PANE_WIDTH = rightPaneState !== null ? 350 : 0
+            const PANEL_HEIGHT = this.props.project.get('topPane') !== null ? 200 : 0
+            const DRAWER_WIDTH = this.props.project.get('leftPane') !== null ? 350 : 0
+            const DOC_EXPLORER_PANE_WIDTH = this.props.project.get('rightPane') !== null ? 350 : 0
 
             return (
                 <Layout>
@@ -313,10 +201,10 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                 width={width}
                                 height={HEADER_HEIGHT}
                                 left={headerLeft}
-                                center={this.props.project.get('selectedTab') ? headerCenter : null}
+                                center={selectedTab ? headerCenter : null}
                                 right={headerRight}
                             />
-                            {topPaneState === 'HEADERS' ? (
+                            {this.props.project.get('topPane') === 'HEADERS' ? (
                                 <HeaderEditor
                                     top={HEADER_HEIGHT}
                                     width={width}
@@ -328,7 +216,7 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                     onHeaderRemove={this.headerEditorController.handleRemove}
                                 />
                             ) : null}
-                            {topPaneState === 'VARIABLES' ? (
+                            {this.props.project.get('topPane') === 'VARIABLES' ? (
                                 <VariableEditor
                                     top={HEADER_HEIGHT}
                                     width={width}
@@ -349,8 +237,11 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                 <Tabs
                                     width={width}
                                     height={TABS_HEIGHT}
-                                    activeId={this.props.project.get('selectedTabId')}
-                                    tabs={this.props.project.get('tabs')}
+                                    activeId={this.props.project.getIn(['selectedTab', 'id'])}
+                                    tabs={this.props.project.get('queryTabs').map(tab => {
+                                        const title = tab.getIn(['query', 'operationName'])
+                                        return tab.set('title', title || "<Unnamed>")
+                                    })}
                                     onClick={this.handleTabClick}
                                     onRemove={this.handleTabRemove}
                                     onAdd={this.handleTabAdd}
@@ -362,7 +253,7 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                      height: height - HEADER_HEIGHT - PANEL_HEIGHT - TABS_HEIGHT
                                  }}
                             >
-                                {leftPaneState !== null ? (
+                                {this.props.project.get('leftPane') !== null ? (
                                     <div
                                         className="ProjectDetail__Drawer"
                                         style={{
@@ -371,9 +262,9 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                         }}
                                     >
                                         <QueryList
-                                            data={queries}
+                                            data={this.props.project.get('historyQueries')}
                                             rowHeight={72}
-                                            activeId={selectedTab && selectedTab.getIn(['request', 'id'])}
+                                            activeId={selectedTab && selectedTab.get('queryId')}
                                             onItemClick={this.handleQueryClick}
                                             onItemRemove={this.handleQueryRemove}
                                         />
@@ -397,16 +288,15 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                         {selectedTab ? (
                                             <GraphiQL
                                                 ref={ref => this.graphiql = ref}
-                                                schema={schema}
+                                                schema={this.props.schema}
                                                 onEditQuery={this.handleEditQuery}
                                                 onEditVariables={this.handleEditVariables}
-                                                onEditOperationName={this.handleEditOperationName}
                                                 onRunQuery={this.handleEditorRunQuery}
-                                                query={selectedTab.getIn(['request', 'query'])}
-                                                operationName={selectedTab.getIn(['request', 'operationName'])}
-                                                response={selectedTab.getIn(['request', 'response'])}
-                                                variables={selectedTab.getIn(['request', 'variables'])}
-                                                isWaitingForResponse={selectedTab.getIn(['request', 'loading'])}
+                                                query={selectedTab.getIn(['query', 'query'])}
+                                                operationName={selectedTab.getIn(['query', 'operationName'])}
+                                                response={selectedTab.getIn(['query', 'response'])}
+                                                variables={selectedTab.getIn(['query', 'variables'])}
+                                                isWaitingForResponse={selectedTab.get('loading')}
                                             />
                                         ) : (
                                             <div>
@@ -416,7 +306,7 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                     </div>
                                 </div>
                                 {
-                                    rightPaneState === 'DOCS' &&
+                                    this.props.project.get('rightPane') === 'DOCS' &&
                                     <div className="DocExplorerPane" style={{
                                         width: DOC_EXPLORER_PANE_WIDTH,
                                         height: height - HEADER_HEIGHT - PANEL_HEIGHT - TABS_HEIGHT
@@ -431,7 +321,7 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                                                 ref={c => {
                                                     this.docExplorerComponent = c;
                                                 }}
-                                                schema={schema}
+                                                schema={this.props.schema}
                                             />
                                         </div>
                                     </div>
@@ -451,13 +341,16 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
 
         handlePrettifyQuery = () => {
 
-            const selectedTab = this.props.project.get('selectedTab')
+            if (this.props.project.get('selectedTab')) {
+                const query = this.props.project.getIn(['selectedTab', 'query', 'query'])
 
-            if (selectedTab) {
-                const query = selectedTab.getIn(['request', 'query'])
+                const tabId = this.props.project.getIn(['selectedTab', 'id'])
 
-                this.updateSelectedTab(tab => {
-                    return tab.setIn(['request', 'query'], print(parse(query)))
+                this.props.updateQueryTab({
+                    id: tabId,
+                    data: {
+                        query: print(parse(query))
+                    }
                 })
             }
         }
@@ -468,71 +361,84 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
 
         runQuery = async() => {
 
+            const requestId = uuid.v4()
             const environment = this.props.project.get('selectedEnvironment')
-            const tab = this.props.project.get('selectedTab')
 
             const startTime = moment()
 
             this.props.projectUpdateTab({
                 projectId: this.props.project.get('id'),
-                tabId: tab.get('id'),
-                updateFn: tab => {
-                    return tab
-                        .setIn(['request', 'loading'], true)
+                id: this.props.project.getIn(['selectedTab', 'id']),
+                data: {
+                    loading: true
                 }
             })
 
-            const response = await this.fetchQuery({
+            const query = this.props.project.getIn(['selectedTab', 'query', 'query'])
+            const headers = this.props.project.get('headers')
+            const variables = environment.get('variables')
+
+            const fullResponse = await this.fetchQuery({
                 url: environment.get('url'),
-                method: this.props.project.getIn(['settings', 'queryMethod']),
-                headers: applyVariablesToHeaders(this.props.project),
+                method: this.props.project.get('queryMethod'),
+                headers: createHeaders(headers, variables),
                 params: {
-                    query: tab.getIn(['request', 'query']),
-                    operationName: tab.get(['request', 'operationName']),
-                    variables: tab.get(['request', 'variables'])
+                    query,
+                    operationName: this.props.project.getIn(['selectedTab', 'query', 'operationName']),
+                    variables: this.props.project.getIn(['selectedTab', 'query', 'variables'])
                 }
             })
 
-            // const query = Map({
-            //     title: this.state.operationName,
-            //     type: 'HISTORY',
-            //     duration: +moment() - +startTime,
-            //     environmentId: environment.id,
-            //     operationType: null
-            // })
+            const response = JSON.stringify(fullResponse, null, 2)
+            const duration = +moment() - +startTime
 
-            this.props.projectUpdateTab({
-                projectId: this.props.project.get('id'),
-                tabId: tab.get('id'),
-                updateFn: tab => {
-                    return tab
-                        .setIn(['request', 'loading'], false)
-                        .setIn(['request', 'response'], JSON.stringify(response, null, 2))
+            const historyQuery = await this.props.createHistoryQuery({
+                data: {
+                    operationType: getOperationType(this.props.schema, query),
+                    operationName: this.props.project.getIn(['selectedTab', 'query', 'operationName']),
+                    variables: this.props.project.getIn(['selectedTab', 'query', 'variables']),
+                    duration,
+                    response
+                }
+            })
+
+            return await this.props.updateQueryTab({
+                id: this.props.project.getIn(['selectedTab', 'id']),
+                data: {
+                    queryId: historyQuery.get('id'),
+                    loading: false
                 }
             })
         }
 
-        handleTabAdd = () => {
-            this.props.projectAddTab({
-                projectId: this.props.project.get('id')
+        handleTabAdd = async() => {
+
+            await this.props.createQueryTab({
+                input: {
+                    type: 'NEW',
+                    projectId: this.props.project.get('id')
+                }
             })
+
+            await this.props.reload()
         }
 
         handleTabClick = ({id}) => {
 
             this.props.updateProject({
-                id: this.props.project.get('id'),
-                data: this.props.project.get('source').set('selectedTabId', id)
+                data: {
+                    id: this.props.project.get('id'),
+                    selectedTabId: id
+                }
             })
         }
 
         handleTabRemove = ({id}) => {
 
-            this.props.updateProject({
-                id: this.props.project.get('id'),
-                data: this.props.project.get('source').update('tabs', tabs => {
-                    return tabs.filter(tab => tab.get('id') !== id)
-                })
+            this.props.removeQueryTab({
+                data: {
+                    id: id
+                }
             })
         }
 
@@ -570,7 +476,7 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
 
             return (
                 <select ref="environment" name="environment" className="Select form-control"
-                        value={this.props.project.get('selectedEnvironment')}
+                        value={this.props.project.getIn(['selectedEnvironment', 'id'])}
                         onChange={this.handleEnvironmentChange}>
                     {this.props.project.get('environments').map(environment => (
                         <option
@@ -602,12 +508,8 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
 
             this.props.updateProject({
                 id: projectId,
-                data: this.props.project.get('source').set('environmentId', id)
+                data: this.props.project.get('source').set('selectedEnvironmentId', id)
             })
-        }
-
-        handleOperationNameChange = () => {
-
         }
 
         updateEnvironment = (id, updateFn) => {
@@ -634,6 +536,9 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
         }
 
         handleEditQuery = (query) => {
+            if (this.props.schema) {
+                this._updateQueryFacts()
+            }
             this.updateSelectedTab(tab => {
                 return tab.setIn(['request', 'query'], query)
             })
@@ -646,14 +551,14 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
         }
 
         handleEditOperationName = (operationName) => {
+
+            console.log('operationName', operationName)
             this.updateSelectedTab(tab => {
-                return tab.set(['request', 'operationName'], operationName)
+                return tab.setIn(['request', 'operationName'], operationName)
             })
         }
 
         fetchQuery = ({url, method, headers, params}) => {
-
-            console.log('params', params)
 
             params = omitBy(params, isNil)
             params = omitBy(params, isEmpty)
@@ -679,36 +584,59 @@ export default (actions, selectors, history, Loader, Layout, WorkspaceHeader, Me
                 options.body = JSON.stringify(params)
             }
 
-            console.log({
-                url,
-                method,
-                headers,
-                params
-            })
-
             return fetch(url, options).then(res => res.json())
         }
 
         handleQueryClick = ({id}) => {
 
-            queries.findQuery({queryId: id}).then(query => {
+            const request = this.props.requests.find(request => request.get('id') === id)
 
-                query = readQuery({query})
+            if (!request) {
+                return
+            }
 
-                this.setState({
-                    query,
-                    operationName: query.get('title')
-                })
+            console.log('request', request.toJSON())
+
+            this.updateSelectedTab(tab => {
+                return tab
+                    .setIn(['request', 'id'], request.get('id'))
+                    .setIn(['request', 'operationName'], request.get('operationName'))
+                    .setIn(['request', 'variables'], request.get('variables'))
+                    .setIn(['request', 'query'], request.get('query'))
+                    .setIn(['request', 'response'], request.get('response'))
             })
         }
 
         handleQueryRemove = ({id}) => {
 
-            mutations.removeQuery({queryId: id}).then(() => {
-                this.fetchQueries({projectId: this.props.project._id})
-            })
+            if (this.props.leftPaneState === 'HISTORY') {
+                this.props.projectRemoveHistoryRequest({
+                    projectId: this.props.project.get('id'),
+                    id
+                })
+            }
         }
+
+        _updateQueryFacts = debounce(50, () => {
+
+            let operationName = null
+
+            if (this.props.schema) {
+
+                const queryFacts = getQueryFacts(this.props.schema, this.props.selectedTab.getIn(['request', 'query']));
+
+                if (queryFacts && queryFacts.operations) {
+                    operationName = get(queryFacts, 'operations[0].name.value')
+                }
+            }
+
+            console.log('operationName', operationName)
+
+            this.updateSelectedTab(tab => {
+                return tab.setIn(['request', 'operationName'], operationName)
+            })
+        })
     }
 
-    return connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ProjectDetail)
+    return view(mapQueriesToProps, mutations)(ProjectDetail)
 }
