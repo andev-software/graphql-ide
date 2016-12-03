@@ -377,7 +377,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                                             onItemRemove={this.handleQueryRemove}
                                         />
                                     </div>
-                                ): null}
+                                ) : null}
                                 <div
                                     className="ProjectDetail__GraphiQL"
                                     style={{
@@ -679,7 +679,7 @@ export default (mutations, queries, history, Loader, Layout, WorkspaceHeader, Me
                     this.fetchQueries({projectId})
                 })
 
-                return response.data
+                return response
             })
         }
 
