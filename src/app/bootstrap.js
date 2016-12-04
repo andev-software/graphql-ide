@@ -18,9 +18,16 @@ export default di => {
     })
 
     di.register({
+        name: 'app/services/dataStore',
+        dependencies: [],
+        factory: require('app/services/data-store').default
+    })
+
+    di.register({
         name: 'app/services/store',
         dependencies: [
-            'app/reducers/root'
+            'app/reducers/root',
+            'app/services/dataStore'
         ],
         factory: require('app/services/store').default
     })
@@ -29,23 +36,33 @@ export default di => {
         name: 'app/reducers/root',
         dependencies: [
             'app/reducers/app',
-            'app/reducers/entities'
+            'app/reducers/dataStore'
         ],
         factory: require('app/reducers/root').default
     })
 
     di.register({
         name: 'app/reducers/app',
-        dependencies: [
-        ],
+        dependencies: [],
         factory: require('app/reducers/app').default
     })
 
     di.register({
-        name: 'app/reducers/entities',
+        name: 'app/services/actionCreators',
         dependencies: [
+            'app/services/dataStore'
         ],
-        factory: require('app/reducers/entities').default
+        factory: (dataStore) => {
+            return dataStore.getFlatActionCreators()
+        }
+    })
+
+    di.register({
+        name: 'app/reducers/dataStore',
+        dependencies: [
+            'app/services/dataStore'
+        ],
+        factory: require('app/reducers/data-store').default
     })
 
     di.register({
@@ -235,7 +252,7 @@ export default di => {
     di.register({
         name: 'app/components/projectList/ProjectList',
         dependencies: [
-            'app/services/actions',
+            'app/services/actionCreators',
             'app/services/selectors',
             'app/services/importExport',
             'app/services/history',

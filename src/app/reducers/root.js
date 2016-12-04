@@ -1,8 +1,9 @@
 import {combineReducers} from "redux-immutable"
 
-export default (app, entities) => {
+export default (app, dataStore) => {
+
     return combineReducers({
         app,
-        entities
+        dataStore
     })
 }

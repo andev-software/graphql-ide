@@ -6,44 +6,26 @@ import createLogger from "redux-logger"
 import {persistStore, autoRehydrate} from 'redux-persist-immutable'
 import {AsyncNodeStorage} from 'redux-persist-node-storage'
 
-export default (rootReducer) => {
+export default (rootReducer, dataStore) => {
 
     const dataPath = electron.remote.app.getPath('userData')
 
     const initialState = Map()
 
-    console.log('initial state', initialState)
-
     const logger = createLogger()
 
     const createStoreWithMiddleware = applyMiddleware(thunk, logger)(createStore)
 
-    // const store = createStore(rootReducer, initialState, compose(applyMiddleware(, thunk)))
-    const store = createStoreWithMiddleware(rootReducer, initialState, autoRehydrate())
-    // persistStore(store, {
-    //     storage: {
-    //         getAllKeys: () => {
-    //             console.log('get all keys')
-    //         },
-    //         getItem: (key) => {
-    //             console.log('get item key', key)
-    //         },
-    //         setItem: (key, value) => {
-    //             console.log('set item key', key, 'value', value)
-    //         },
-    //         removeItem: (key) => {
-    //             console.log('remove item key', key)
-    //         }
-    //     }
-    // })
+    const store = createStoreWithMiddleware(rootReducer, initialState, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__({
+            actionCreators: dataStore.getFlatActionCreators()
+        }))
+    // const store = createStoreWithMiddleware(rootReducer, initialState, autoRehydrate())
 
     store.subscribe(() => {
         console.log(store.getState().toJSON())
     })
 
-    console.log(dataPath + '/data')
-
-    persistStore(store, {storage: new AsyncNodeStorage(dataPath + '/data')})
+    // persistStore(store, {storage: new AsyncNodeStorage(dataPath + '/data')})
 
     return store
 }

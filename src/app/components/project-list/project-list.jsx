@@ -5,8 +5,9 @@ import {Map, List} from "immutable"
 import moment from "moment"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
+import uuid from "uuid"
 
-export default (actions, selectors, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
+export default (actionCreators, selectors, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
@@ -14,7 +15,7 @@ export default (actions, selectors, importExport, history, Layout, WorkspaceHead
         projects: selectors.allProjects(state)
     })
 
-    const mapDispatchToProps = dispatch => bindActionCreators(actions, dispatch)
+    const mapDispatchToProps = dispatch => bindActionCreators(actionCreators, dispatch)
 
     class ProjectList extends React.Component {
 
@@ -23,6 +24,8 @@ export default (actions, selectors, importExport, history, Layout, WorkspaceHead
         }
 
         render() {
+
+            console.log('this.props', this.props)
 
             const HEADER_HEIGHT = 40
 
@@ -171,8 +174,13 @@ export default (actions, selectors, importExport, history, Layout, WorkspaceHead
 
                     if (result.status === 'SAVE') {
 
-                        this.props.createProject({
-                            data: result.payload.input
+                        const id = uuid.v4()
+
+                        this.props.projectsCreate({
+                            id,
+                            data: Map({
+                                id
+                            }).merge(result.payload.input)
                         })
                     }
                 })

@@ -1,3 +1,18 @@
+const devtools = require('electron-devtools-installer')
+const installExtension = devtools.default
+const {REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS} = devtools
+
+const extensions = [
+    REACT_DEVELOPER_TOOLS,
+    REDUX_DEVTOOLS
+]
+
+Promise.all(extensions.map(extension => {
+    return installExtension(extension, true)
+        .then((name) => console.log(`Added Extension:  ${name}`))
+        .catch((err) => console.log('An error occurred: ', err))
+}))
+
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app

@@ -21,7 +21,9 @@
     "url": "http://github.com/redound/graphql-ide.git"
   },
   "dependencies": {
+    "camel-case": "^3.0.0",
     "classnames": "^2.2.5",
+    "electron-devtools-installer": "^2.0.1",
     "font-awesome": "^4.7.0",
     "graphiql": "^0.8.0",
     "graphql": "^0.8.2",
@@ -43,6 +45,7 @@
     "redux-persist-immutable": "^4.0.1",
     "redux-persist-node-storage": "^1.0.2",
     "redux-thunk": "^2.1.0",
+    "snake-case": "^2.1.0",
     "uuid": "^3.0.0",
     "validator": "^6.1.0"
   },
