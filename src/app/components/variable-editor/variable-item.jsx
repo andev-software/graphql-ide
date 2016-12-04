@@ -1,34 +1,10 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import {Map} from "immutable"
 import cn from "classnames"
 
 export default () => {
 
     return class VariableItem extends React.Component {
-
-        state = {
-            invalid: false,
-            variable: Map({
-                key: '',
-                value: ''
-            })
-        }
-
-        componentWillMount() {
-            this.setState({
-                variable: this.props.variable
-            })
-        }
-
-        componentWillUpdate(nextProps) {
-
-            if (this.props.variable !== nextProps.variable) {
-                this.setState({
-                    variable: nextProps.variable
-                })
-            }
-        }
 
         componentDidMount() {
 
@@ -44,17 +20,17 @@ export default () => {
                     <div className="VariableItem__Element VariableItem__Key">
                         <input
                             ref="key"
-                            className={cn("Input", {error: this.state.invalid})}
-                            value={this.state.variable.get('key')}
-                            onChange={this.handleChange}
+                            className={cn("Input", {error: this.props.invalid})}
+                            value={this.props.id}
+                            onChange={this.handleKeyChange}
                         />
                     </div>
                     <div className="VariableItem__Element VariableItem__Value">
                         <input
                             ref="value"
                             className="Input"
-                            value={this.state.variable.get('value')}
-                            onChange={this.handleChange}
+                            value={this.props.value}
+                            onChange={this.handleValueChange}
                         />
                     </div>
                     <div className="VariableItem__Element VariableItem__RemoveButton">
@@ -70,23 +46,21 @@ export default () => {
             )
         }
 
-        handleChange = e => {
+        handleKeyChange = e => {
 
-            this.setState({
-                invalid: this.props.keyBlacklist.contains(this.refs.key.value),
-                variable: Map({
-                    key: this.refs.key.value,
-                    value: this.refs.value.value
-                })
-            }, () => {
+            this.props.onKeyChange({
+                e,
+                id: this.props.id,
+                key: this.refs.key.value
+            })
+        }
 
-                if (!this.state.invalid) {
-                    this.props.onChange({
-                        e,
-                        id: this.props.id,
-                        variable: this.state.variable
-                    })
-                }
+        handleValueChange = e => {
+
+            this.props.onValueChange({
+                e,
+                id: this.props.id,
+                value: this.refs.value.value
             })
         }
 

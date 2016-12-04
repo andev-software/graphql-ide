@@ -1,13 +1,11 @@
 import React from "react"
 import createModal from "app/utils/create-modal"
 import electron from "electron"
-import {Map, List} from "immutable"
 import moment from "moment"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
-import uuid from "uuid"
 
-export default (actionCreators, selectors, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
+export default (actionCreators, selectors, factories, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
 
     ProjectFormModal = createModal(ProjectFormModal)
 
@@ -164,23 +162,15 @@ export default (actionCreators, selectors, importExport, history, Layout, Worksp
         handleNewClick = () => {
 
             this.ctrls.projectFormModal.open({
-                project: Map({
-                    title: '',
-                    description: '',
-                    environments: List()
-                })
+                project: factories.createProject()
             })
                 .then(result => {
 
                     if (result.status === 'SAVE') {
 
-                        const id = uuid.v4()
-
                         this.props.projectsCreate({
-                            id,
-                            data: Map({
-                                id
-                            }).merge(result.payload.input)
+                            id: result.payload.input.get('id'),
+                            data: result.payload.input
                         })
                     }
                 })

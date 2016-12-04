@@ -12,13 +12,11 @@ export default (EndpointsEditor) => {
             errors: List(),
             changed: Map({
                 title: false,
-                description: false,
-                environments: false
+                description: false
             }),
             project: Map({
                 title: '',
-                description: '',
-                environments: List()
+                description: ''
             })
         }
 
@@ -52,9 +50,6 @@ export default (EndpointsEditor) => {
 
             const title = this.state.project.get('title')
             const description = this.state.project.get('description')
-            const environments = this.state.project.get('environments')
-
-            console.log('state', this.state.project, environments)
 
             const checks = [() => {
 
@@ -84,14 +79,6 @@ export default (EndpointsEditor) => {
                     })
                 }
 
-            }, () => {
-
-                if (environments.isEmpty()) {
-                    return Map({
-                        name: 'environments',
-                        message: `You need to have at least one environment configured`
-                    })
-                }
             }]
 
             const errors = checks.reduce((result, check) => {
@@ -164,16 +151,6 @@ export default (EndpointsEditor) => {
                                     onChange={this.handleDescriptionChange}
                                 />
                             </FormGroup>
-                            <FormGroup
-                                controlId="environments"
-                                validationState={this.getValidationState('environments')}
-                            >
-                                <ControlLabel>Endpoints</ControlLabel>
-                                <EndpointsEditor
-                                    endpoints={this.state.project.get('environments')}
-                                    onChange={this.handleEnvironmentChange}
-                                />
-                            </FormGroup>
                         </Modal.Body>
                         <Modal.Footer>
                             <button type="button" className="btn btn-default" onClick={this.props.close}>Close</button>
@@ -199,14 +176,6 @@ export default (EndpointsEditor) => {
             this.updateProjectProperty({
                 property: 'description',
                 value: e.target.value
-            })
-        }
-
-        handleEnvironmentChange = ({endpoints}) => {
-
-            this.updateProjectProperty({
-                property: 'environments',
-                value: endpoints
             })
         }
 

@@ -1,34 +1,32 @@
 import React from "react"
-import {Map, List} from "immutable"
+import {Map} from "immutable"
 
 export default (VariableItem) => {
 
     return class VariableEditor extends React.Component {
 
         state = {
-            variables: List()
+            value: Map()
         }
 
         componentDidMount() {
-            this.computeVariables(this.props)
+            this.computeValue(this.props)
         }
 
         componentWillUpdate(nextProps) {
 
-            if (this.props.variables !== nextProps.variables) {
-                this.computeVariables(nextProps)
+            if (this.props.value !== nextProps.value) {
+                this.computeValue(nextProps)
             }
         }
 
-        computeVariables(props) {
+        computeValue(props) {
             this.setState({
-                variables: props.variables
+                value: props.value
             })
         }
 
         render() {
-
-            const keyBlacklist = this.state.variables.map(variable => variable.get('key'))
 
             return (
                 <div
@@ -39,18 +37,29 @@ export default (VariableItem) => {
                         height: this.props.height
                     }}
                 >
-                    {this.state.variables.size ? (
+                    {this.state.value.size ? (
                         <div className="VariableEditorBody TopPaneBody">
-                            {this.state.variables.map((variable, index) => (
-                                <VariableItem
-                                    key={index}
-                                    id={index}
-                                    variable={variable}
-                                    keyBlacklist={keyBlacklist.remove(index)}
-                                    onChange={this.handleChange}
-                                    onRemove={this.handleRemove}
-                                />
-                            )).toArray()}
+                            {this.state.value.map((value, key, map) => {
+
+                                const index = map.keySeq().indexOf(key)
+
+                                console.log({
+                                    key,
+                                    value,
+                                    index
+                                })
+
+                                return (
+                                    <VariableItem
+                                        key={index}
+                                        id={key}
+                                        value={value}
+                                        onKeyChange={this.handleKeyChange}
+                                        onValueChange={this.handleValueChange}
+                                        onRemove={this.handleRemove}
+                                    />
+                                )
+                            }).toArray()}
                         </div>
                     ) : (
                         <div className="VariableEditorBody TopPaneBody">
@@ -89,43 +98,54 @@ export default (VariableItem) => {
 
         handleAddClick = e => {
 
-            if (this.state.variables.find(variable => variable.get('key') === '')) {
+            if (this.state.value.has('')) {
                 return
             }
 
             this.setState({
-                variables: this.state.variables.push(Map({
-                    key: '',
-                    value: ''
-                }))
+                value: this.state.value.set('', '')
             }, () => this.emitChanges())
         }
 
-        handleChange = ({id, variable}) => {
+        handleKeyChange = ({id, key}) => {
+
+            const value = this.state.value.get(id)
 
             this.setState({
-                variables: this.state.variables.set(id, variable)
+                value: this.state.value
+                    .remove(id)
+                    .set(key, value)
+            }, () => this.emitChanges())
+        }
+
+        handleValueChange = ({id, value}) => {
+
+            console.log('id', id, 'value', value)
+
+            this.setState({
+                value: this.state.value
+                    .set(id, value)
             }, () => this.emitChanges())
         }
 
         handleRemove = ({id}) => {
 
             this.setState({
-                variables: this.state.variables.remove(id)
+                value: this.state.value.remove(id)
             }, () => this.emitChanges())
         }
 
         handleClearClick = e => {
 
             this.setState({
-                variables: List()
+                value: Map()
             }, () => this.emitChanges())
         }
 
         emitChanges() {
 
             this.props.onChange({
-                variables: this.state.variables
+                value: this.state.value
             })
         }
     }

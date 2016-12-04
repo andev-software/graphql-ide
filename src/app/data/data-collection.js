@@ -1,4 +1,4 @@
-import {List, Map} from "immutable"
+import {List, Map, fromJS} from "immutable"
 
 function hydrateReducer(type) {
 
@@ -26,7 +26,7 @@ function createReducer(type) {
 
         if (!record) {
             state = state.update(type + 'ById', cache => {
-                return cache.set(action.payload.id, action.payload.data)
+                return cache.set(action.payload.id, fromJS(action.payload.data))
             })
         }
 

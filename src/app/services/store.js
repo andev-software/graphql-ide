@@ -3,6 +3,7 @@ import {fromJS, Map} from "immutable"
 import {createStore, applyMiddleware, compose} from "redux"
 import thunk from "redux-thunk"
 import createLogger from "redux-logger"
+import isEmpty from "lodash/isEmpty"
 import fs from "fs"
 
 export default (rootReducer, dataStore) => {
@@ -13,8 +14,15 @@ export default (rootReducer, dataStore) => {
     let initialState = Map()
 
     if (fs.existsSync(filePath)) {
-        const state = fs.readFileSync(filePath, 'utf-8')
-        initialState = fromJS(JSON.parse(state))
+        let state = fs.readFileSync(filePath, 'utf-8')
+
+        if (!isEmpty(state)) {
+            state = JSON.parse(state)
+        }
+
+        if (state) {
+            initialState = fromJS(state)
+        }
     }
 
     const logger = createLogger()

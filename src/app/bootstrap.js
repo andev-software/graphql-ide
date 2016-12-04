@@ -72,6 +72,12 @@ export default di => {
     })
 
     di.register({
+        name: 'app/services/factories',
+        dependencies: [],
+        factory: require('app/services/factories').default
+    })
+
+    di.register({
         name: 'app/services/database',
         dependencies: [],
         factory: require('app/services/database').default
@@ -143,6 +149,17 @@ export default di => {
         name: 'app/components/layout/Layout',
         dependencies: [],
         factory: require('app/components/layout/layout').default
+    })
+
+    di.register({
+        name: 'app/components/projectEditModal/ProjectEditModal',
+        dependencies: [
+            'app/services/store',
+            'app/services/selectors',
+            'app/services/actionCreators',
+            'app/components/projectFormModal/ProjectFormModal'
+        ],
+        factory: require('app/components/project-edit-modal/project-edit-modal').default
     })
 
     di.register({
@@ -232,8 +249,9 @@ export default di => {
     di.register({
         name: 'app/components/projectDetail/ProjectDetail',
         dependencies: [
-            'app/services/actions',
+            'app/services/actionCreators',
             'app/services/selectors',
+            'app/services/factories',
             'app/services/history',
             'app/components/loader/Loader',
             'app/components/layout/Layout',
@@ -244,7 +262,7 @@ export default di => {
             'app/components/queryList/QueryList',
             'app/components/tabs/Tabs',
             'app/components/graphiql/GraphiQL',
-            'app/components/projectFormModal/ProjectFormModal'
+            'app/components/projectEditModal/ProjectEditModal'
         ],
         factory: require('app/components/project-detail/project-detail').default
     })
@@ -254,6 +272,7 @@ export default di => {
         dependencies: [
             'app/services/actionCreators',
             'app/services/selectors',
+            'app/services/factories',
             'app/services/importExport',
             'app/services/history',
             'app/components/layout/Layout',
