@@ -42,8 +42,6 @@
     "redux": "^3.6.0",
     "redux-immutable": "^3.0.8",
     "redux-logger": "^2.7.4",
-    "redux-persist-immutable": "^4.0.1",
-    "redux-persist-node-storage": "^1.0.2",
     "redux-thunk": "^2.1.0",
     "snake-case": "^2.1.0",
     "uuid": "^3.0.0",

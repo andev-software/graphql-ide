@@ -1,16 +1,21 @@
 import electron from "electron"
-import {Map} from "immutable"
+import {fromJS, Map} from "immutable"
 import {createStore, applyMiddleware, compose} from "redux"
 import thunk from "redux-thunk"
 import createLogger from "redux-logger"
-import {persistStore, autoRehydrate} from 'redux-persist-immutable'
-import {AsyncNodeStorage} from 'redux-persist-node-storage'
+import fs from "fs"
 
 export default (rootReducer, dataStore) => {
 
     const dataPath = electron.remote.app.getPath('userData')
+    const filePath = dataPath + '/state.json'
 
-    const initialState = Map()
+    let initialState = Map()
+
+    if (fs.existsSync(filePath)) {
+        const state = fs.readFileSync(filePath, 'utf-8')
+        initialState = fromJS(JSON.parse(state))
+    }
 
     const logger = createLogger()
 
@@ -19,13 +24,11 @@ export default (rootReducer, dataStore) => {
     const store = createStoreWithMiddleware(rootReducer, initialState, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__({
             actionCreators: dataStore.getFlatActionCreators()
         }))
-    // const store = createStoreWithMiddleware(rootReducer, initialState, autoRehydrate())
 
     store.subscribe(() => {
-        console.log(store.getState().toJSON())
+        const state = store.getState().toJSON()
+        fs.writeFileSync(filePath, JSON.stringify(state, null, 4), 'utf-8')
     })
-
-    // persistStore(store, {storage: new AsyncNodeStorage(dataPath + '/data')})
 
     return store
 }
