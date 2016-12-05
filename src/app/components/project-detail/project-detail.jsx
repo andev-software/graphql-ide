@@ -120,7 +120,15 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                     closeTab: {
                         description: 'Close Tab',
                         click: this.closeTab
-                    }
+                    },
+                    clearHistoryQueries: {
+                        description: 'Clear history queries',
+                        click: this.clearHistoryQueries
+                    },
+                    clearCollectionQueries: {
+                        description: 'Clear collection queries',
+                        click: this.clearCollectionQueries
+                    },
                 },
                 edit: {
                     prettifyQuery: {
@@ -476,6 +484,9 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             const activeTab = this.props.project.get('activeTab')
             let query = activeTab.get('query')
 
+            console.log('query', query)
+            console.log('query', query.toJSON())
+
             if (!activeEnvironment.get('schemaResponse')) {
                 swal("Hey Ya!", "No schema available. Check the environment settings", "error")
                 return
@@ -610,7 +621,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             this.props.tabsCreate({
                 id: tab.get('id'),
                 data: tab.merge({
-                    queryId: query.get('id')
+                    historyQueryId: query.get('id')
                 })
             })
 
@@ -862,6 +873,20 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                 data: {
                     queryId: collectionQuery.get('id')
                 }
+            })
+        }
+
+        clearHistoryQueries = () => {
+
+            this.props.project.get('historyQueryIds').forEach(queryId => {
+                this.handleQueryRemove({id: queryId})
+            })
+        }
+
+        clearCollectionQueries = () => {
+
+            this.props.project.get('collectionQueryIds').forEach(queryId => {
+                this.handleQueryRemove({id: queryId})
             })
         }
     }

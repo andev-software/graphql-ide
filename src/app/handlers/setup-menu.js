@@ -50,11 +50,17 @@ export default (store) => {
                     accelerator: 'Command+T',
                     click: get(delegate, 'file.newTab.click')
                 }, {
-                    type: 'separator'
-                }, {
                     label: 'Close Tab',
                     accelerator: 'Command+W',
                     click: get(delegate, 'file.closeTab.click')
+                },  {
+                    type: 'separator'
+                }, {
+                    label: get(delegate, 'file.clearHistoryQueries.description'),
+                    click: get(delegate, 'file.clearHistoryQueries.click')
+                }, {
+                    label: get(delegate, 'file.clearCollectionQueries.description'),
+                    click: get(delegate, 'file.clearCollectionQueries.click')
                 }]
             }, {
                 label: 'Edit',
