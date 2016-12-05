@@ -282,8 +282,10 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                         isWaitingForResponse={activeTab.get('loading')}
                                     />
                                 ) : (
-                                    <div>
-                                        Empty
+                                    <div className="Workspace__Empty">
+                                        <div className="Workspace__EmptyMessage">
+                                            Start by opening a tab
+                                        </div>
                                     </div>
                                 )}
                             </div>
