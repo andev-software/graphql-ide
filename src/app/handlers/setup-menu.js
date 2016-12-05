@@ -141,7 +141,7 @@ export default (store) => {
                     type: 'separator'
                 }, {
                     label: 'Reload',
-                    accelerator: 'Command+R',
+                    accelerator: 'Command+Shift+R',
                     click: function () {
                         currentWindow.reload()
                     }

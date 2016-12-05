@@ -1,4 +1,3 @@
-
 import validator from "validator"
 import React from "react"
 import ReactDOM from "react-dom"
@@ -10,6 +9,7 @@ import moment from "moment"
 import electron from "electron"
 const {remote} = electron
 import fs from "fs"
+import {buildClientSchema} from 'graphql'
 
 export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHeader, PanelBody, PanelFooter}) => {
 
@@ -127,7 +127,9 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                 environment: this.state.environment.set(property, value)
             }, () => {
                 this.validate()
-                cb()
+                if (cb) {
+                    cb()
+                }
             })
         }
 
@@ -307,11 +309,16 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                 method: this.state.environment.get('queryMethod')
             }).then((response) => {
 
-                this.setState({
-                    environment: this.state.environment
-                        .set('schemaResponse', JSON.stringify(response.data))
-                        .set('schemaUpdatedAt', moment().utc().toISOString())
-                })
+                const schema = buildClientSchema(response.data)
+
+                if (schema) {
+                    this.setState({
+                        environment: this.state.environment
+                            .set('schemaResponse', JSON.stringify(response.data))
+                            .set('schemaUpdatedAt', moment().utc().toISOString())
+                    })
+                }
+
             }).catch(() => {
 
                 this.setState({

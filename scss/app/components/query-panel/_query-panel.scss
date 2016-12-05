@@ -1,3 +1,22 @@
+.QueryPanel__Empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background-color: #fafafa;
+}
+
+.QueryPanel__EmptyMessage {
+  display: flex;
+  color: #888;
+  padding: 0 50px;
+  text-align: center;
+}
+
 .QueryMeta {
   position: relative;
   display: block;

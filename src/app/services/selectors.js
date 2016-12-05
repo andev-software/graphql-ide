@@ -28,8 +28,13 @@ export default () => {
 
     function readTab(state, tab) {
 
+        const queryId = tab.get('collectionQueryId') || tab.get('historyQueryId')
+
         return tab.merge({
-            query: findQuery(state, {id: tab.get('queryId')})
+            queryId: queryId,
+            query: findQuery(state, {id: queryId}),
+            collectionQuery: findQuery(state, {id: tab.get('collectionQueryId')}),
+            historyQuery: findQuery(state, {id: tab.get('historyQueryId')})
         })
     }
 
@@ -62,7 +67,7 @@ export default () => {
             title: query.get('operationName') || '<Unnamed>',
             shortname: (query.get('operationType') || "").substring(0, 2),
             meta: moment(query.get('updatedAt')).from(moment()),
-            subMea: query.get('duration') + 'ms',
+            subMeta: query.get('duration') + 'ms',
         }))
 
         return project.merge({

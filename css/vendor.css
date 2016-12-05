@@ -6659,23 +6659,23 @@ div.CodeMirror-dragcursors {
 span.CodeMirror-selectedtext {
   background: none; }
 
-.DocExplorerPane .doc-explorer {
-  background: #f0f0f0; }
+.DocumentationPanel .doc-explorer {
+  background: #f7f7f7; }
 
-.DocExplorerPane .doc-explorer-title-bar {
+.DocumentationPanel .doc-explorer-title-bar {
   cursor: default;
   display: -webkit-flex;
   display: flex;
-  height: 40px;
+  height: 46px;
   line-height: 14px;
   padding: 3px 3px 5px;
   position: relative;
   -webkit-user-select: none;
   user-select: none; }
 
-.DocExplorerPane .doc-explorer-title {
-  padding: 10px 0 10px 10px;
-  font-weight: bold;
+.DocumentationPanel .doc-explorer-title {
+  padding: 13px 0;
+  font-weight: 200;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6684,31 +6684,31 @@ span.CodeMirror-selectedtext {
   flex: 1;
   height: 40px; }
 
-.DocExplorerPane .doc-explorer-back {
+.DocumentationPanel .doc-explorer-back {
   color: #222222;
   cursor: pointer;
   margin: -7px 0 -6px -8px;
   overflow: hidden;
-  padding: 17px 12px 16px 16px;
+  padding: 21px 12px 21px 16px;
   text-overflow: ellipsis;
   white-space: nowrap; }
 
-.DocExplorerPane .doc-explorer-back:before {
+.DocumentationPanel .doc-explorer-back:before {
   border-left: 2px solid #222222;
   border-top: 2px solid #222222;
   content: '';
   display: inline-block;
   height: 9px;
-  margin: 0 3px -1px 0;
+  margin: 0 3px 0 0;
   position: relative;
   width: 9px;
   -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg); }
 
-.DocExplorerPane .doc-explorer-rhs {
+.DocumentationPanel .doc-explorer-rhs {
   position: relative; }
 
-.DocExplorerPane .doc-explorer-contents {
+.DocumentationPanel .doc-explorer-contents {
   background-color: #ffffff;
   border-top: 1px solid #D4D4D4;
   bottom: 0;
@@ -6718,26 +6718,26 @@ span.CodeMirror-selectedtext {
   padding: 20px 15px;
   position: absolute;
   right: 0;
-  top: 39px; }
+  top: 46px; }
 
-.DocExplorerPane .doc-type-description p:first-child,
-.DocExplorerPane .doc-type-description blockquote:first-child {
+.DocumentationPanel .doc-type-description p:first-child,
+.DocumentationPanel .doc-type-description blockquote:first-child {
   margin-top: 0; }
 
-.DocExplorerPane .doc-explorer-contents a {
+.DocumentationPanel .doc-explorer-contents a {
   cursor: pointer;
   text-decoration: none; }
 
-.DocExplorerPane .doc-explorer-contents a:hover {
+.DocumentationPanel .doc-explorer-contents a:hover {
   text-decoration: underline; }
 
-.DocExplorerPane .doc-value-description {
+.DocumentationPanel .doc-value-description {
   padding: 4px 0 8px 12px; }
 
-.DocExplorerPane .doc-category {
+.DocumentationPanel .doc-category {
   margin: 20px 0; }
 
-.DocExplorerPane .doc-category-title {
+.DocumentationPanel .doc-category-title {
   border-bottom: 1px solid #e0e0e0;
   color: #777;
   cursor: default;
@@ -6750,37 +6750,37 @@ span.CodeMirror-selectedtext {
   -webkit-user-select: none;
   user-select: none; }
 
-.DocExplorerPane .doc-category-item {
+.DocumentationPanel .doc-category-item {
   margin: 12px 0;
   color: #555; }
 
-.DocExplorerPane .keyword {
+.DocumentationPanel .keyword {
   color: #B11A04; }
 
-.DocExplorerPane .type-name {
+.DocumentationPanel .type-name {
   color: #CA9800; }
 
-.DocExplorerPane .field-name {
+.DocumentationPanel .field-name {
   color: #1F61A0; }
 
-.DocExplorerPane .value-name {
+.DocumentationPanel .value-name {
   color: #0B7FC7; }
 
-.DocExplorerPane .arg-name {
+.DocumentationPanel .arg-name {
   color: #8B2BB9; }
 
-.DocExplorerPane .arg:after {
+.DocumentationPanel .arg:after {
   content: ', '; }
 
-.DocExplorerPane .arg:last-child:after {
+.DocumentationPanel .arg:last-child:after {
   content: ''; }
 
-.DocExplorerPane .doc-alert-text {
+.DocumentationPanel .doc-alert-text {
   color: #F00F00;
   font-family: 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace;
   font-size: 13px; }
 
-.DocExplorerPane .search-box-outer {
+.DocumentationPanel .search-box-outer {
   border: 1px solid #d3d6db;
   box-sizing: border-box;
   display: inline-block;
@@ -6791,7 +6791,7 @@ span.CodeMirror-selectedtext {
   vertical-align: middle;
   width: 100%; }
 
-.DocExplorerPane .search-box-input {
+.DocumentationPanel .search-box-input {
   border: 0;
   font-size: 12px;
   margin: 0;

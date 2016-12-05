@@ -46,7 +46,21 @@ export default (db) => {
             options.body = JSON.stringify(params)
         }
 
-        return fetch(url, options).then(res => res.json())
+        return fetch(url, options)
+            .then(res => res.text())
+            .then(res => {
+
+                try {
+                    return JSON.parse(res)
+                } catch (e) {
+                    return {
+                        data: null,
+                        errors: [{
+                            message: res
+                        }]
+                    }
+                }
+            })
     }
 
     function allProjects() {

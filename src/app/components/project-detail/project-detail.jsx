@@ -9,20 +9,13 @@ import getOperationType from "app/components/graphiql/utils/get-operation-type"
 import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
+import swal from "sweetalert"
 
-function applyVariablesToHeaders(project) {
+function applyVariablesToHeaders(variables, headers) {
 
-    const headers = project.get('headers')
-    const variables = project.get('variables')
+    return headers.reduce((result, headerValue, headerKey) => {
 
-    return headers.reduce((result, header) => {
-
-        const headerKey = header.get('key')
-        let headerValue = header.get('value')
-
-        variables.forEach(variable => {
-            const varKey = variable.get('key')
-            const varValue = variable.get('value')
+        variables.forEach((varValue, varKey) => {
             headerValue = headerValue.replace(`{{${varKey}}}`, varValue)
         })
 
@@ -107,12 +100,15 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                 description: 'Run',
                 disabled: !this.props.project.get('activeTab'),
                 onClick: () => this.runQuery()
-            }, {
-                description: 'Prettify',
-                disabled: !this.props.project.get('activeTab'),
-                onClick: () => this.handlePrettifyQuery()
             }]
 
+            if (this.props.project.getIn(['activeTab', 'query', 'type']) === 'HISTORY') {
+
+                buttonsLeft.push({
+                    description: 'Save query',
+                    onClick: () => this.handleSaveQuery()
+                })
+            }
             const headerLeft = (
                 <div className="Menu Menu--horizontal">
                     {buttonsLeft.map((item, key) => (
@@ -271,7 +267,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                     height: height - HEADER_HEIGHT - TABS_HEIGHT
                                 }}
                             >
-                                {schema && activeTab ? (
+                                {activeTab ? (
                                     <GraphiQL
                                         ref={ref => this.graphiql = ref}
                                         schema={schema}
@@ -281,7 +277,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                         onRunQuery={this.handleEditorRunQuery}
                                         query={activeTab.getIn(['query', 'query']) || ''}
                                         operationName={activeTab.getIn(['query', 'operationName']) || ''}
-                                        response={activeTab.getIn(['query', 'response']) || ''}
+                                        response={activeTab.getIn(['historyQuery', 'response']) || ''}
                                         variables={activeTab.getIn(['query', 'variables']) || ''}
                                         isWaitingForResponse={activeTab.get('loading')}
                                     />
@@ -293,7 +289,13 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                             </div>
                         </div>
                         {rightPanel !== null && (
-                            <div className="ProjectDetail__RightPanel">
+                            <div
+                                className="ProjectDetail__RightPanel"
+                                style={{
+                                    width: RIGHT_PANEL_WIDTH,
+                                    height: RIGHT_PANEL_HEIGHT
+                                }}
+                            >
                                 {rightPanel === 'PROJECT' && (
                                     <ProjectPanel
                                         width={RIGHT_PANEL_WIDTH}
@@ -314,32 +316,41 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                     <QueryPanel
                                         width={RIGHT_PANEL_WIDTH}
                                         height={RIGHT_PANEL_HEIGHT}
+                                        projectId={this.props.project.get('id')}
                                         queryId={this.props.project.getIn(['activeTab', 'queryId'])}
                                         onClose={this.handleRightPanelClose}
                                     />
                                 )}
-                                {(rightPanel === 'DOCUMENTATION' && schema) && (
+                                {(rightPanel === 'DOCUMENTATION') && (
                                     <div
-                                        className="DocExplorerPane"
+                                        className="DocumentationPanel"
                                         style={{
                                             width: RIGHT_PANEL_WIDTH,
                                             height: RIGHT_PANEL_HEIGHT
                                         }}
                                     >
-                                        <div
-                                            className="docExplorerWrap"
-                                            style={{
-                                                width: RIGHT_PANEL_WIDTH,
-                                                height: RIGHT_PANEL_HEIGHT
-                                            }}
-                                        >
-                                            <DocExplorer
-                                                ref={c => {
-                                                    this.docExplorerComponent = c;
+                                        {schema ? (
+                                            <div
+                                                className="docExplorerWrap"
+                                                style={{
+                                                    width: RIGHT_PANEL_WIDTH,
+                                                    height: RIGHT_PANEL_HEIGHT
                                                 }}
-                                                schema={schema}
-                                            />
-                                        </div>
+                                            >
+                                                <DocExplorer
+                                                    ref={c => {
+                                                        this.docExplorerComponent = c;
+                                                    }}
+                                                    schema={schema}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="DocumentationPanel__Empty">
+                                                <div className="DocumentationPanel__EmptyMessage">
+                                                    Schema needed to display docs. Check the environment settings.
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -399,6 +410,11 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             const activeTab = this.props.project.get('activeTab')
             let query = activeTab.get('query')
 
+            if (!activeEnvironment.get('schemaResponse')) {
+                swal("Hey Ya!", "No schema available. Check the environment settings", "error")
+                return
+            }
+
             const startTime = moment()
 
             this.props.tabsUpdate({
@@ -408,10 +424,17 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                 }
             })
 
+            const environmentVariables = activeEnvironment.get('variables')
+            const projectHeaders = this.props.project.get('headers')
+            const queryHeaders = query.get('headers')
+            const mergedHeaders = projectHeaders.merge(queryHeaders)
+
+            const headers = applyVariablesToHeaders(environmentVariables, mergedHeaders)
+
             const response = await queries.fetchQuery({
                 url: activeEnvironment.get('url'),
                 method: activeEnvironment.get('queryMethod'),
-                headers: applyVariablesToHeaders(this.props.project),
+                headers: headers,
                 params: {
                     query: query.get('query'),
                     operationName: query.get('operationName'),
@@ -422,7 +445,9 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             const duration = +moment() - +startTime
             const responseString = JSON.stringify(response, null, 2)
 
-            if (query.get('type') === 'HISTORY') {
+            const queryType = query.get('type')
+
+            if (queryType === 'HISTORY' || queryType === 'COLLECTION') {
 
                 query = factories.createQuery().merge({
                     type: 'HISTORY',
@@ -441,6 +466,13 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                     data: query
                 })
 
+                this.props.tabsUpdate({
+                    id: activeTab.get('id'),
+                    data: {
+                        historyQueryId: query.get('id')
+                    }
+                })
+
                 this.props.projectsAttachHistoryQuery({
                     projectId: this.props.project.get('id'),
                     queryId: query.get('id')
@@ -456,19 +488,26 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                         response: responseString
                     }
                 })
+
+                this.props.tabsUpdate({
+                    id: activeTab.get('id'),
+                    data: {
+                        collectionQueryId: null,
+                        historyQueryId: query.get('id')
+                    }
+                })
+
+                this.props.projectsAttachHistoryQuery({
+                    projectId: this.props.project.get('id'),
+                    queryId: query.get('id')
+                })
             }
 
             this.props.tabsUpdate({
                 id: activeTab.get('id'),
                 data: {
-                    queryId: query.get('id'),
                     loading: false
                 }
-            })
-
-            this.props.projectsAttachHistoryQuery({
-                projectId: this.props.project.get('id'),
-                queryId: query.get('id')
             })
         }
 
@@ -611,8 +650,22 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             const state = store.getState()
             const query = selectors.findQuery(state, {id})
 
-            const data = {
-                queryId: query.get('id')
+            let data = {
+                historyQueryId: null,
+                collectionQueryId: null
+            }
+
+            if (query.get('type') === 'HISTORY') {
+                data = {
+                    historyQueryId: query.get('id'),
+                    collectionQueryId: null
+                }
+            }
+
+            if (query.get('type') === 'COLLECTION') {
+                data = {
+                    collectionQueryId: query.get('id')
+                }
             }
 
             let tab = this.props.project.get('activeTab')
@@ -679,6 +732,43 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                 id: this.props.project.get('id'),
                 data: {
                     rightPanel: null
+                }
+            })
+        }
+
+        handleSaveQuery = () => {
+
+            const query = this.props.project.getIn(['activeTab', 'query'])
+
+            if (!query) {
+                return
+            }
+
+            const collectionQuery = factories.createQuery().merge({
+                type: 'COLLECTION',
+                operationType: query.get('operationType'),
+                operationName: query.get('operationName'),
+                query: query.get('query'),
+                variables: query.get('variables'),
+                headers: query.get('headers')
+            })
+
+            console.log('collectionQuery', collectionQuery.toJSON())
+
+            this.props.queriesCreate({
+                id: collectionQuery.get('id'),
+                data: collectionQuery
+            })
+
+            this.props.projectsAttachCollectionQuery({
+                projectId: this.props.project.get('id'),
+                queryId: collectionQuery.get('id')
+            })
+
+            this.props.tabsUpdate({
+                id: this.props.project.get('activeTabId'),
+                data: {
+                    queryId: collectionQuery.get('id')
                 }
             })
         }
