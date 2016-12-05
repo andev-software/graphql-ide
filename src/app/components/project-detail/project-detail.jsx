@@ -792,6 +792,25 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                     queryId: id
                 })
             }
+
+            // Remove tabs related to this query
+            this.props.project.get('tabs').forEach(tab => {
+
+                if (tab.get('historyQueryId') === id || tab.get('collectionQueryId') === id) {
+                    console.log('remove tab with id', id)
+                    this.props.projectsDetachTab({
+                        projectId: this.props.project.get('id'),
+                        tabId: tab.get('id')
+                    })
+                    this.props.tabsRemove({
+                        id: tab.get('id')
+                    })
+                }
+            })
+
+            this.props.queriesRemove({
+                id
+            })
         }
 
         handleWindowResize = () => {
