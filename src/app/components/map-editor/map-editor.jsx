@@ -112,8 +112,6 @@ export default (MapItem) => {
 
         handleValueChange = ({id, value}) => {
 
-            console.log('id', id, 'value', value)
-
             this.setState({
                 value: this.state.value
                     .set(id, value)

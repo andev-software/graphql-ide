@@ -43,6 +43,7 @@ export default () => {
                 activeTabId: null,
                 leftPanel: null,
                 rightPanel: null,
+                bottomPanel: null,
                 headers: Map(),
                 tabIds: List(),
                 environmentIds: List(),

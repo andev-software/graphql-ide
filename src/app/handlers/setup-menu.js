@@ -1,9 +1,10 @@
 import electron from "electron"
 const {Menu} = electron.remote
+import get from "lodash/get"
 
 export default (store) => {
 
-    return () => {
+    return (delegate) => {
 
         const currentWindow = electron.remote.getCurrentWindow()
 
@@ -47,29 +48,28 @@ export default (store) => {
                 submenu: [{
                     label: 'New Tab',
                     accelerator: 'Command+T',
-                    click: () => {
-                        console.log('new tab')
-                        store.dispatch({
-                            type: 'BUMP_VERSION'
-                        })
-                    }
+                    click: get(delegate, 'file.newTab.click')
                 }, {
                     type: 'separator'
                 }, {
                     label: 'Close Tab',
                     accelerator: 'Command+W',
-                    click: () => {
-                        console.log('close tab')
-                    }
+                    click: get(delegate, 'file.closeTab.click')
                 }]
             }, {
                 label: 'Edit',
                 submenu: [{
-                    label: 'Prettify query',
-                    accelerator: 'Command+P',
-                    click: () => {
-                        console.log('prettify query')
-                    }
+                    label: get(delegate, 'edit.prettifyQuery.description'),
+                    accelerator: 'Command+O',
+                    click: get(delegate, 'edit.prettifyQuery.click')
+                }, {
+                    label: get(delegate, 'edit.executeQuery.description'),
+                    accelerator: 'Command+E',
+                    click: get(delegate, 'edit.executeQuery.click')
+                }, {
+                    label: get(delegate, 'edit.saveQuery.description'),
+                    accelerator: 'Command+S',
+                    click: get(delegate, 'edit.saveQuery.click')
                 }, {
                     type: 'separator'
                 }, {
@@ -92,50 +92,50 @@ export default (store) => {
             }, {
                 label: 'View',
                 submenu: [{
-                    label: 'Panes',
+                    label: 'Panels',
                     sublabel: 'test',
                     submenu: [{
                         type: 'checkbox',
                         label: 'Collection',
                         accelerator: 'Command+1',
-                        click: () => {
-                            console.log('test123')
-                        }
+                        checked: get(delegate, 'view.panels.collection.checked'),
+                        click: get(delegate, 'view.panels.collection.click')
                     }, {
                         type: 'checkbox',
                         label: 'History',
                         accelerator: 'Command+2',
-                        click: () => {
-                            console.log('test123')
-                        }
+                        checked: get(delegate, 'view.panels.history.checked'),
+                        click: get(delegate, 'view.panels.history.click')
+                    }, {
+                        type: 'checkbox',
+                        label: 'Project',
+                        accelerator: 'Command+3',
+                        checked: get(delegate, 'view.panels.project.checked'),
+                        click: get(delegate, 'view.panels.project.click')
+                    }, {
+                        type: 'checkbox',
+                        label: 'Environment',
+                        accelerator: 'Command+4',
+                        checked: get(delegate, 'view.panels.environment.checked'),
+                        click: get(delegate, 'view.panels.environment.click')
+                    }, {
+                        type: 'checkbox',
+                        label: 'Query',
+                        accelerator: 'Command+5',
+                        checked: get(delegate, 'view.panels.query.checked'),
+                        click: get(delegate, 'view.panels.query.click')
                     }, {
                         type: 'checkbox',
                         label: 'Documentation',
-                        accelerator: 'Command+3',
-                        click: () => {
-                            console.log('test123')
-                        }
+                        accelerator: 'Command+6',
+                        checked: get(delegate, 'view.panels.documentation.checked'),
+                        click: get(delegate, 'view.panels.documentation.click')
                     }, {
                         type: 'checkbox',
                         label: 'Query variables',
-                        accelerator: 'Command+4',
-                        click: () => {
-                            console.log('test123')
-                        }
-                    }, {
-                        type: 'checkbox',
-                        label: 'Variables',
-                        accelerator: 'Command+5',
-                        click: () => {
-                            console.log('test123')
-                        }
-                    }, {
-                        type: 'checkbox',
-                        label: 'Headers',
-                        accelerator: 'Command+6',
-                        click: () => {
-                            console.log('test123')
-                        }
+                        accelerator: 'Command+7',
+                        checked: get(delegate, 'view.panels.queryVariables.checked'),
+                        click: get(delegate, 'view.panels.queryVariables.click')
                     }]
                 }, {
                     type: 'separator'

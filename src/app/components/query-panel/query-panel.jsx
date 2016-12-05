@@ -43,22 +43,23 @@ export default ({actionCreators, selectors, MapEditor, Panel, PanelHeader, Panel
                 )
             }
 
-            console.log('query', this.props.query.toJSON())
-
-
             const typeInfoItems = {
                 HISTORY: [{
                     key: 'Executed at',
                     value: moment(this.props.query.get('createdAt')).format('DD/MM/YYYY HH:mm')
-                }]
+                }],
+                COLLECTION: [{
+                    key: 'Updated at',
+                    value: moment(this.props.query.get('updatedAt')).format('DD/MM/YYYY HH:mm')
+                }, {
+                    key: 'Created at',
+                    value: moment(this.props.query.get('createdAt')).format('DD/MM/YYYY HH:mm')
+                }],
             }
 
             const additionalInfoItems = typeInfoItems[this.props.query.get('type')] || []
 
             const infoItems = [{
-                key: 'ID',
-                value: this.props.query.get('id')
-            }, {
                 key: 'Type',
                 value: (
                     <div className="label label-primary">
@@ -130,7 +131,8 @@ export default ({actionCreators, selectors, MapEditor, Panel, PanelHeader, Panel
             this.props.queriesUpdate({
                 id: this.props.query.get('id'),
                 data: {
-                    headers: value
+                    headers: value,
+                    updatedAt: moment().utc().toISOString()
                 }
             })
         }

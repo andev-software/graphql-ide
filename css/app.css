@@ -487,7 +487,7 @@ body {
   padding: 9px 10px;
   margin: 0;
   font-size: 11px;
-  transition: background-color 0.25s ease-in-out;
+  transition: background-color 50ms ease-in-out;
   align-items: center;
   cursor: pointer;
   border-right: 1px solid #b4b4b4; }
@@ -514,7 +514,7 @@ body {
     border-radius: 3px;
     overflow: hidden;
     transform: scale(0);
-    transition: transform .08s; }
+    transition: transform 80ms; }
     .TabItem .close-icon:hover {
       background-color: #E10098; }
       .TabItem .close-icon:hover:before {
@@ -546,7 +546,7 @@ body {
     background-color: #d0d0d0;
     background-clip: content-box;
     backface-visibility: hidden;
-    transition: background-color 0.25s ease-in-out;
+    transition: background-color 50ms ease-in-out;
     white-space: nowrap; }
 
 .TabAddButton .add-icon {

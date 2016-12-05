@@ -1,7 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
-export default (RootView, setupMenu) => {
+export default (RootView) => {
 
     function renderApplicationRoot() {
         return new Promise((resolve) => {
@@ -14,7 +14,6 @@ export default (RootView, setupMenu) => {
     }
 
     function run() {
-        setupMenu()
         renderApplicationRoot()
             .then(() => removeApplicationLoader())
     }

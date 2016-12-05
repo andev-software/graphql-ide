@@ -10,6 +10,8 @@ import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
 import swal from "sweetalert"
+import get from "lodash/get"
+import {createSelector} from "reselect"
 
 function applyVariablesToHeaders(variables, headers) {
 
@@ -25,15 +27,7 @@ function applyVariablesToHeaders(variables, headers) {
     }, {})
 }
 
-function transformHeaders({headers}) {
-
-    return headers.reduce((result, header) => {
-        result[header.get('key')] = header.get('value')
-        return result
-    }, {})
-}
-
-export default ({store, actionCreators, selectors, queries, factories, history, WorkspaceHeader, MenuItem, QueryList, Tabs, GraphiQL, ProjectPanel, EnvironmentPanel, QueryPanel}) => {
+export default ({store, actionCreators, selectors, queries, factories, history, setupMenu, WorkspaceHeader, MenuItem, QueryList, Tabs, GraphiQL, ProjectPanel, EnvironmentPanel, QueryPanel}) => {
 
     const mapStateToProps = (state, props) => {
 
@@ -56,57 +50,161 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
         state = {
             width: 0,
             height: 0,
-            schemaCache: Map()
+            schemaCache: Map(),
+            menu: null
         }
 
         componentDidMount() {
             window.addEventListener('resize', this.handleWindowResize)
             this.handleWindowResize()
+
+            this.updateMenu()
         }
+
+        componentDidUpdate() {
+            this.updateMenu()
+        }
+
+        updateMenu() {
+
+            const menu = this.getMenu(this.props.project)
+
+            if (this.state.menu !== menu) {
+                setupMenu(menu)
+                this.setState({
+                    menu
+                })
+            }
+        }
+
+        getMenu = createSelector([
+            project => project.get('id'),
+            project => project.get('leftPanel'),
+            project => project.get('rightPanel'),
+            project => project.get('bottomPanel'),
+        ], (projectId, leftPanel, rightPanel, bottomPanel) => {
+
+            const props = {
+                projectId,
+                leftPanel,
+                rightPanel,
+                bottomPanel
+            }
+
+            const createPanel = ({description, panelKey, panelValue}) => {
+
+                const currentPanelValue = props[panelKey]
+
+                return {
+                    description,
+                    checked: panelValue === currentPanelValue,
+                    click: () => {
+
+                        const data = {}
+                        data[panelKey] = currentPanelValue === panelValue ? null : panelValue
+
+                        this.props.projectsUpdate({
+                            id: projectId,
+                            data
+                        })
+                    }
+                }
+            }
+
+            return {
+                file: {
+                    newTab: {
+                        description: 'New Tab',
+                        click: this.newTab
+                    },
+                    closeTab: {
+                        description: 'Close Tab',
+                        click: this.closeTab
+                    }
+                },
+                edit: {
+                    prettifyQuery: {
+                        description: 'Prettify',
+                        click: this.handlePrettifyQuery
+                    },
+                    executeQuery: {
+                        description: 'Execute',
+                        click: this.runQuery
+                    },
+                    saveQuery: {
+                        description: 'Save',
+                        click: this.handleSaveQuery
+                    },
+                },
+                view: {
+                    panels: {
+                        collection: createPanel({
+                            description: 'Collection',
+                            panelKey: 'leftPanel',
+                            panelValue: 'COLLECTION'
+                        }),
+                        history: createPanel({
+                            description: 'History',
+                            panelKey: 'leftPanel',
+                            panelValue: 'HISTORY'
+                        }),
+                        documentation: createPanel({
+                            description: 'Documentation',
+                            panelKey: 'rightPanel',
+                            panelValue: 'DOCUMENTATION'
+                        }),
+                        project: createPanel({
+                            description: 'Project',
+                            panelKey: 'rightPanel',
+                            panelValue: 'PROJECT'
+                        }),
+                        environment: createPanel({
+                            description: 'Environment',
+                            panelKey: 'rightPanel',
+                            panelValue: 'ENVIRONMENT'
+                        }),
+                        query: createPanel({
+                            description: 'Query',
+                            panelKey: 'rightPanel',
+                            panelValue: 'QUERY'
+                        }),
+                        queryVariables: createPanel({
+                            description: 'Query variables',
+                            panelKey: 'bottomPanel',
+                            panelValue: 'QUERY_VARIABLES'
+                        })
+                    }
+                }
+            }
+        })
 
         render() {
 
             const activeEnvironment = this.props.project.get('activeEnvironment')
 
-            const projectId = this.props.project.get('id')
             const leftPanel = this.props.project.get('leftPanel')
 
             const buttonsLeft = [{
                 description: 'Back',
                 onClick: () => history.push('/project-list')
             }, {
-                description: 'Collection',
-                active: leftPanel === 'COLLECTION',
-                onClick: () => {
-                    this.props.projectsUpdate({
-                        id: projectId,
-                        data: {
-                            leftPanel: leftPanel === 'COLLECTION' ? null : 'COLLECTION'
-                        }
-                    })
-                }
+                description: get(this.state.menu, 'view.panels.collection.description'),
+                active: get(this.state.menu, 'view.panels.collection.checked'),
+                onClick: get(this.state.menu, 'view.panels.collection.click')
             }, {
-                description: 'History',
-                active: leftPanel === 'HISTORY',
-                onClick: () => {
-                    this.props.projectsUpdate({
-                        id: projectId,
-                        data: {
-                            leftPanel: leftPanel === 'HISTORY' ? null : 'HISTORY'
-                        }
-                    })
-                }
+                description: get(this.state.menu, 'view.panels.history.description'),
+                active: get(this.state.menu, 'view.panels.history.checked'),
+                onClick: get(this.state.menu, 'view.panels.history.click')
             }, {
-                description: 'Run',
-                disabled: !this.props.project.get('activeTab'),
-                onClick: () => this.runQuery()
+                description: get(this.state.menu, 'edit.executeQuery.description'),
+                onClick: get(this.state.menu, 'edit.executeQuery.click')
             }]
 
             if (this.props.project.getIn(['activeTab', 'query', 'type']) === 'HISTORY') {
 
                 buttonsLeft.push({
-                    description: 'Save query',
-                    onClick: () => this.handleSaveQuery()
+                    description: get(this.state.menu, 'edit.saveQuery.description'),
+                    onClick: get(this.state.menu, 'edit.saveQuery.click')
                 })
             }
             const headerLeft = (
@@ -126,53 +224,21 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             const rightPanel = this.props.project.get('rightPanel')
 
             const buttonsRight = [{
-                description: 'Documentation',
-                active: rightPanel === 'DOCUMENTATION',
-                onClick: () => {
-                    this.props.projectsUpdate({
-                        id: projectId,
-                        data: {
-                            rightPanel: rightPanel === 'DOCUMENTATION' ? null : 'DOCUMENTATION'
-                        }
-                    })
-                }
+                description: get(this.state.menu, 'view.panels.project.description'),
+                active: get(this.state.menu, 'view.panels.project.checked'),
+                onClick: get(this.state.menu, 'view.panels.project.click')
             }, {
-                description: 'Project',
-                active: rightPanel === 'PROJECT',
-                onClick: () => {
-                    this.props.projectsUpdate({
-                        id: projectId,
-                        data: {
-                            rightPanel: rightPanel === 'PROJECT' ? null : 'PROJECT'
-                        }
-                    })
-                }
+                description: get(this.state.menu, 'view.panels.environment.description'),
+                active: get(this.state.menu, 'view.panels.environment.checked'),
+                onClick: get(this.state.menu, 'view.panels.environment.click')
             }, {
-                description: 'Environment',
-                active: rightPanel === 'ENVIRONMENT',
-                onClick: () => {
-
-                    if (activeEnvironment) {
-
-                        this.props.projectsUpdate({
-                            id: projectId,
-                            data: {
-                                rightPanel: rightPanel === 'ENVIRONMENT' ? null : 'ENVIRONMENT'
-                            }
-                        })
-                    }
-                }
+                description: get(this.state.menu, 'view.panels.query.description'),
+                active: get(this.state.menu, 'view.panels.query.checked'),
+                onClick: get(this.state.menu, 'view.panels.query.click')
             }, {
-                description: 'Query',
-                active: rightPanel === 'QUERY',
-                onClick: () => {
-                    this.props.projectsUpdate({
-                        id: projectId,
-                        data: {
-                            rightPanel: rightPanel === 'QUERY' ? null : 'QUERY'
-                        }
-                    })
-                }
+                description: get(this.state.menu, 'view.panels.documentation.description'),
+                active: get(this.state.menu, 'view.panels.documentation.checked'),
+                onClick: get(this.state.menu, 'view.panels.documentation.click')
             }]
 
             const headerRight = (
@@ -387,16 +453,14 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
         handlePrettifyQuery = () => {
 
-            const activeTab = this.props.project.get('activeTab')
+            const query = this.props.project.getIn(['activeTab', 'query'])
 
-            if (activeTab) {
+            if (query) {
 
-                const query = activeTab.get('query')
-
-                this.props.tabsUpdate({
-                    id: activeTab.get('id'),
+                this.props.queriesUpdate({
+                    id: query.get('id'),
                     data: {
-                        query: print(parse(query))
+                        query: print(parse(query.get('query')))
                     }
                 })
             }
@@ -513,6 +577,23 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             })
         }
 
+        newTab = () => {
+            this.handleTabAdd()
+        }
+
+        closeTab = () => {
+
+            const activeTabId = this.props.project.get('activeTabId')
+
+            if (!activeTabId) {
+                return
+            }
+
+            this.handleTabRemove({
+                id: activeTabId
+            })
+        }
+
         handleTabAdd = () => {
 
             const query = factories.createQuery().merge({
@@ -606,16 +687,8 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
         updateQueryFacts = debounce(() => {
 
             const query = this.props.project.getIn(['activeTab', 'query'])
-            console.log('query', query.toJSON())
 
             const queryFacts = getQueryFacts(this.getSchema(), query.get('query'))
-
-            console.log('queryFacts', queryFacts)
-
-            console.log({
-                operationName: getOperationName(queryFacts),
-                operationType: getOperationType(queryFacts),
-            })
 
             this.props.queriesUpdate({
                 id: query.get('id'),
@@ -742,7 +815,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
             const query = this.props.project.getIn(['activeTab', 'query'])
 
-            if (!query) {
+            if (!query || query.get('type') !== 'HISTORY') {
                 return
             }
 
@@ -754,8 +827,6 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                 variables: query.get('variables'),
                 headers: query.get('headers')
             })
-
-            console.log('collectionQuery', collectionQuery.toJSON())
 
             this.props.queriesCreate({
                 id: collectionQuery.get('id'),

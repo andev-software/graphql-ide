@@ -17,8 +17,6 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
 
         render() {
 
-            console.log('this.props', this.props)
-
             const HEADER_HEIGHT = 40
 
             const leftButtons = [{

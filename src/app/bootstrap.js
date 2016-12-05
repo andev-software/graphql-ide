@@ -3,8 +3,7 @@ export default di => {
     di.register({
         name: 'app',
         dependencies: [
-            'app/components/RootView',
-            'app/handlers/setupMenu'
+            'app/components/RootView'
         ],
         factory: require('app').default
     })
@@ -278,6 +277,7 @@ export default di => {
             'app/services/queries',
             'app/services/factories',
             'app/services/history',
+            'app/handlers/setupMenu',
             'app/components/workspace/WorkspaceHeader',
             'app/components/workspace/MenuItem',
             'app/components/queryList/QueryList',

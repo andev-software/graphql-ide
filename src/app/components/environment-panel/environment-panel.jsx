@@ -371,7 +371,6 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
             const filePath = await this.promptSaveDialog()
 
             if (filePath) {
-                console.log('filePath', filePath)
                 const data = JSON.parse(this.state.environment.get('schemaResponse'))
                 return await this.saveFile(filePath, data)
             }
