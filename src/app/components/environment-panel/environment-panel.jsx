@@ -1,3 +1,4 @@
+
 import validator from "validator"
 import React from "react"
 import ReactDOM from "react-dom"
@@ -139,7 +140,7 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                 >
                     <form onSubmit={this.handleSubmit}>
                         <PanelHeader>
-                            Edit environment
+                            Environment
                         </PanelHeader>
                         <PanelBody>
                             {this.state.message ? (
@@ -173,7 +174,6 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                                     <option value="GET">GET</option>
                                 </select>
                             </FormGroup>
-
                             <FormGroup
                                 controlId="url"
                                 validationState={this.getValidationState('url')}
@@ -182,7 +182,7 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                                 <div className="UrlEditor">
                                     <div className="UrlEditorSection">
                                         <FormControl
-                                            ref="title"
+                                            ref="url"
                                             type="text"
                                             value={this.state.environment.get('url')}
                                             placeholder="Enter a url"

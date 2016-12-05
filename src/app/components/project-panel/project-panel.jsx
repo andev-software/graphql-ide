@@ -4,10 +4,18 @@ import ReactDOM from "react-dom"
 import {Alert, Modal, FormGroup, FormControl, ControlLabel} from "react-bootstrap"
 import {Map, List} from "immutable"
 import swal from "sweetalert"
+import {connect} from "react-redux"
+import {bindActionCreators} from "redux"
 
-export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFooter}) => {
+export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHeader, PanelBody, PanelFooter}) => {
 
-    return class ProjectPanel extends React.Component {
+    const mapStateToProps = (state, props) => ({
+        project: selectors.findProject(state, {id: props.projectId})
+    })
+
+    const mapDispatchToProps = dispatch => bindActionCreators(actionCreators, dispatch)
+
+    class ProjectPanel extends React.Component {
 
         state = {
             errors: List(),
@@ -158,9 +166,18 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
                 return
             }
 
-            this.props.onUpdate({
-                project: this.state.project
+            this.props.projectsUpdate({
+                id: this.state.project.get('id'),
+                data: {
+                    title: this.state.project.get('title'),
+                    description: this.state.project.get('description'),
+                    headers: this.state.project.get('headers'),
+                    activeEnvironmentId: this.state.project.get('activeEnvironmentId'),
+                    rightPanel: null
+                }
             })
+
+            this.props.onClose()
         }
 
         render() {
@@ -172,7 +189,7 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
                 >
                     <form onSubmit={this.handleSubmit}>
                         <PanelHeader>
-                            Project settings
+                            Project
                         </PanelHeader>
                         <PanelBody>
                             {this.state.message ? (
@@ -206,6 +223,21 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
                                 />
                             </FormGroup>
                             <FormGroup>
+                                <ControlLabel>Active environment</ControlLabel>
+                                <select
+                                    ref="activeEnvironmentId"
+                                    name="activeEnvironmentId"
+                                    className="Select form-control"
+                                    value={this.state.project.get('activeEnvironmentId')}
+                                    onChange={this.handleActiveEnvironmentIdChange}
+                                >
+                                    {this.state.project.get('environments').map(environment => (
+                                        <option key={environment.get('id')}
+                                                value={environment.get('id')}>{environment.get('title')}</option>
+                                    )).toArray()}
+                                </select>
+                            </FormGroup>
+                            <FormGroup>
                                 <ControlLabel>Environments</ControlLabel>
                                 <div className="EnvironmentList">
                                     {this.props.project.get('environments').map(environment => (
@@ -218,13 +250,6 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
                                                     {environment.get('title')}
                                                 </strong>
                                                 <div className="pull-right">
-                                                    <a
-                                                        href="javascript:void(0)"
-                                                        onClick={() => this.handleEnvironmentEdit({id: environment.get('id')})}
-                                                    >
-                                                        Edit
-                                                    </a>
-                                                    {this.props.project.get('environments').size > 1 && ' / '}
                                                     {this.props.project.get('environments').size > 1 && (
                                                         <a
                                                             href="javascript:void(0)"
@@ -263,6 +288,13 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
                     </form>
                 </Panel>
             )
+        }
+
+        handleActiveEnvironmentIdChange = e => {
+
+            this.setState({
+                project: this.state.project.set('activeEnvironmentId', e.target.value)
+            })
         }
 
         handleHeadersChange = ({value}) => {
@@ -307,16 +339,31 @@ export default ({factories, MapEditor, Panel, PanelHeader, PanelBody, PanelFoote
             })
         }
 
-        handleEnvironmentAdd = () => {
-            this.promptEnvironmentName()
-        }
+        handleEnvironmentAdd = ({environment}) => {
 
-        handleEnvironmentEdit = ({id}) => {
-            this.props.onEnvironmentEdit({id})
+            this.props.environmentsCreate({
+                id: environment.get('id'),
+                data: environment
+            })
+
+            this.props.projectsAttachEnvironment({
+                projectId: this.props.project.get('id'),
+                environmentId: environment.get('id')
+            })
         }
 
         handleEnvironmentRemove = ({id}) => {
-            this.props.onEnvironmentRemove({id})
+
+            this.props.projectsDetachEnvironment({
+                projectId: this.props.project.get('id'),
+                environmentId: id
+            })
+
+            this.props.environmentsRemove({
+                id: id
+            })
         }
     }
+
+    return connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ProjectPanel)
 }

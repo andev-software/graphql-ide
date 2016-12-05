@@ -175,6 +175,8 @@ export default di => {
         name: 'app/components/projectPanel/ProjectPanel',
         dependencies: [
             'app/services/factories',
+            'app/services/actionCreators',
+            'app/services/selectors',
             'app/components/mapEditor/MapEditor',
             'app/components/panel/Panel',
             'app/components/panel/PanelHeader',
@@ -183,6 +185,21 @@ export default di => {
         ],
         namedParams: true,
         factory: require('app/components/project-panel/project-panel').default
+    })
+
+    di.register({
+        name: 'app/components/queryPanel/QueryPanel',
+        dependencies: [
+            'app/services/actionCreators',
+            'app/services/selectors',
+            'app/components/mapEditor/MapEditor',
+            'app/components/panel/Panel',
+            'app/components/panel/PanelHeader',
+            'app/components/panel/PanelBody',
+            'app/components/panel/PanelFooter'
+        ],
+        namedParams: true,
+        factory: require('app/components/query-panel/query-panel').default
     })
 
     di.register({
@@ -255,8 +272,10 @@ export default di => {
     di.register({
         name: 'app/components/projectDetail/ProjectDetail',
         dependencies: [
+            'app/services/store',
             'app/services/actionCreators',
             'app/services/selectors',
+            'app/services/queries',
             'app/services/factories',
             'app/services/history',
             'app/components/workspace/WorkspaceHeader',
@@ -265,7 +284,8 @@ export default di => {
             'app/components/tabs/Tabs',
             'app/components/graphiql/GraphiQL',
             'app/components/projectPanel/ProjectPanel',
-            'app/components/environmentPanel/EnvironmentPanel'
+            'app/components/environmentPanel/EnvironmentPanel',
+            'app/components/queryPanel/QueryPanel'
         ],
         namedParams: true,
         factory: require('app/components/project-detail/project-detail').default

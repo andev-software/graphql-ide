@@ -80,6 +80,30 @@ export default () => {
                 localKey: 'projectId',
                 foreignKey: 'environmentId'
             }))
+            .action('ATTACH_HISTORY_QUERY', attachReducer({
+                type: 'projects',
+                listProperty: 'historyQueryIds',
+                localKey: 'projectId',
+                foreignKey: 'queryId'
+            }))
+            .action('DETACH_HISTORY_QUERY', detachReducer({
+                type: 'projects',
+                listProperty: 'historyQueryIds',
+                localKey: 'projectId',
+                foreignKey: 'queryId'
+            }))
+            .action('ATTACH_COLLECTION_QUERY', attachReducer({
+                type: 'projects',
+                listProperty: 'collectionQueryIds',
+                localKey: 'projectId',
+                foreignKey: 'queryId'
+            }))
+            .action('DETACH_COLLECTION_QUERY', detachReducer({
+                type: 'projects',
+                listProperty: 'collectionQueryIds',
+                localKey: 'projectId',
+                foreignKey: 'queryId'
+            }))
         )
         .collection(new DataCollection('tabs')
             .createAction()
@@ -91,12 +115,7 @@ export default () => {
             .updateAction()
             .removeAction()
         )
-        .collection(new DataCollection('collectionQueries')
-            .createAction()
-            .updateAction()
-            .removeAction()
-        )
-        .collection(new DataCollection('historyQueries')
+        .collection(new DataCollection('queries')
             .createAction()
             .updateAction()
             .removeAction()

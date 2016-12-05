@@ -1,9 +1,26 @@
 import {Map, List} from "immutable"
 import uuid from "uuid"
+import moment from "moment"
 
 export default () => {
 
     return {
+        createQuery() {
+
+            return Map({
+                id: uuid.v4(),
+                type: null,
+                title: null,
+                operationName: null,
+                query: null,
+                variables: null,
+                response: null,
+                duration: null,
+                headers: Map({}),
+                updatedAt: moment().utc().toISOString(),
+                createdAt: moment().utc().toISOString()
+            })
+        },
         createEnvironment() {
 
             return Map({
@@ -37,9 +54,7 @@ export default () => {
 
             return Map({
                 id: uuid.v4(),
-                query: '',
-                operationName: '',
-                variables: '',
+                queryId: '',
                 loading: false
             })
         }

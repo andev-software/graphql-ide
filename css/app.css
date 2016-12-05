@@ -168,7 +168,7 @@ body {
 
 .QueryListContent {
   position: absolute;
-  top: 40px;
+  top: 48px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -395,6 +395,20 @@ body {
     display: flex; }
   .MenuItem .Select {
     height: 100%; }
+
+.QueryMeta {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px; }
+
+.QueryMetaItem {
+  padding: 8px 15px;
+  border-bottom: 1px solid #ddd; }
+  .QueryMetaItem:last-of-type {
+    border-bottom: 0; }
 
 .Tabs {
   width: 100%;

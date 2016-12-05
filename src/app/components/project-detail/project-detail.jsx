@@ -1,9 +1,11 @@
 import React from 'react'
-import electron from "electron"
 import moment from "moment"
 import {introspectionQuery, buildClientSchema, print, parse} from 'graphql'
-import {Map, List} from "immutable"
-import get from "lodash/get"
+import {Map} from "immutable"
+import debounce from "lodash/debounce"
+import getQueryFacts from "graphiql/dist/utility/getQueryFacts"
+import getOperationName from "app/components/graphiql/utils/get-operation-name"
+import getOperationType from "app/components/graphiql/utils/get-operation-type"
 import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
@@ -38,14 +40,14 @@ function transformHeaders({headers}) {
     }, {})
 }
 
-export default ({actionCreators, selectors, factories, history, WorkspaceHeader, MenuItem, QueryList, Tabs, GraphiQL, ProjectPanel, EnvironmentPanel}) => {
+export default ({store, actionCreators, selectors, queries, factories, history, WorkspaceHeader, MenuItem, QueryList, Tabs, GraphiQL, ProjectPanel, EnvironmentPanel, QueryPanel}) => {
 
     const mapStateToProps = (state, props) => {
 
         const project = selectors.findProject(state, {id: props.params.id})
         const tabs = project.get('tabs').map(tab => Map({
             id: tab.get('id'),
-            title: tab.get('operationName') || "<Unnamed>"
+            title: tab.getIn(['query', 'operationName']) || "<Unnamed>"
         }))
 
         return {
@@ -61,7 +63,7 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
         state = {
             width: 0,
             height: 0,
-            environmentEditId: null
+            schemaCache: Map()
         }
 
         componentDidMount() {
@@ -69,37 +71,7 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
             this.handleWindowResize()
         }
 
-        fetchSchema(environment) {
-
-            return queries.fetchQuery({
-                url: environment.get('url'),
-                method: 'POST',
-                headers: {},
-                params: {
-                    query: introspectionQuery
-                }
-            }).then(response => {
-
-                this.props.environmentsUpdate({
-                    id: environment.get('id'),
-                    data: {
-                        schema: response.data
-                    }
-                })
-
-            }).catch(e => {
-
-                let errors = get(e, 'response.data.errors')
-
-                errors = errors ? errors.map(error => `• ${error.message}\n`) : null
-
-                electron.remote.dialog.showErrorBox(`Exception - ${e.toString()}`, `Unable to fetch schema for '${environment.url}'\n\n ${errors}`)
-            })
-        }
-
         render() {
-
-            console.log('this.props', this.props)
 
             const activeEnvironment = this.props.project.get('activeEnvironment')
 
@@ -131,6 +103,14 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                         }
                     })
                 }
+            }, {
+                description: 'Run',
+                disabled: !this.props.project.get('activeTab'),
+                onClick: () => this.runQuery()
+            }, {
+                description: 'Prettify',
+                disabled: !this.props.project.get('activeTab'),
+                onClick: () => this.handlePrettifyQuery()
             }]
 
             const headerLeft = (
@@ -178,17 +158,24 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
 
                     if (activeEnvironment) {
 
-                        this.setState({
-                            environmentEditId: activeEnvironment.get('id')
-                        }, () => {
-                            this.props.projectsUpdate({
-                                id: projectId,
-                                data: {
-                                    rightPanel: rightPanel === 'ENVIRONMENT' ? null : 'ENVIRONMENT'
-                                }
-                            })
+                        this.props.projectsUpdate({
+                            id: projectId,
+                            data: {
+                                rightPanel: rightPanel === 'ENVIRONMENT' ? null : 'ENVIRONMENT'
+                            }
                         })
                     }
+                }
+            }, {
+                description: 'Query',
+                active: rightPanel === 'QUERY',
+                onClick: () => {
+                    this.props.projectsUpdate({
+                        id: projectId,
+                        data: {
+                            rightPanel: rightPanel === 'QUERY' ? null : 'QUERY'
+                        }
+                    })
                 }
             }]
 
@@ -206,56 +193,9 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                 </div>
             )
 
-            const buttonsCenter = [{
-                description: 'Run',
-                disabled: !this.props.project.get('activeTab'),
-                onClick: () => this.runQuery()
-            }, {
-                description: 'Prettify',
-                disabled: !this.props.project.get('activeTab'),
-                onClick: () => this.handlePrettifyQuery()
-            }]
-
-            const headerCenter = (
-                <div className="Menu Menu--horizontal">
-                    <div className="MenuItem">
-                        {this.renderEnvironmentSelect()}
-                    </div>
-                    {buttonsCenter.map((item, key) => (
-                        <MenuItem
-                            key={key}
-                            disabled={item.disabled}
-                            active={item.active}
-                            description={item.description}
-                            onClick={item.onClick}
-                        />
-                    ))}
-                </div>
-            )
-
-            let queries = List()
-
-            switch (leftPanel) {
-                case 'COLLECTION':
-                    queries = this.props.project.get('collectionQueries')
-                    break
-                case 'HISTORY':
-                    queries = this.props.project.get('historyQueries')
-                    break
-            }
-
             const activeTab = this.props.project.get('activeTab')
 
-            let schema = null
-
-            if (activeEnvironment) {
-
-                let schemaResponse = activeEnvironment.get('schemaResponse')
-
-                if (schemaResponse) {
-                    schema = buildClientSchema(JSON.parse(schemaResponse))
-                }
-            }
+            const schema = this.getSchema()
 
             const {height, width} = this.state
 
@@ -272,7 +212,6 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                         width={width}
                         height={HEADER_HEIGHT}
                         left={headerLeft}
-                        center={this.props.project.get('activeTab') ? headerCenter : null}
                         right={headerRight}
                     />
                     <div
@@ -309,7 +248,7 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                                 }}
                             >
                                 <QueryList
-                                    data={queries}
+                                    data={this.props.project.get('queries')}
                                     rowHeight={72}
                                     activeId={activeTab && activeTab.get('queryId')}
                                     onItemClick={this.handleQueryClick}
@@ -340,10 +279,10 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                                         onEditVariables={this.handleEditVariables}
                                         onEditOperationName={this.handleEditOperationName}
                                         onRunQuery={this.handleEditorRunQuery}
-                                        query={activeTab.get('query')}
-                                        operationName={activeTab.get('operationName')}
-                                        response={activeTab.get('response')}
-                                        variables={activeTab.get('variables')}
+                                        query={activeTab.getIn(['query', 'query']) || ''}
+                                        operationName={activeTab.getIn(['query', 'operationName']) || ''}
+                                        response={activeTab.getIn(['query', 'response']) || ''}
+                                        variables={activeTab.getIn(['query', 'variables']) || ''}
                                         isWaitingForResponse={activeTab.get('loading')}
                                     />
                                 ) : (
@@ -359,18 +298,23 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                                     <ProjectPanel
                                         width={RIGHT_PANEL_WIDTH}
                                         height={RIGHT_PANEL_HEIGHT}
-                                        project={this.props.project}
-                                        onUpdate={this.handleProjectUpdate}
-                                        onEnvironmentAdd={this.handleEnvironmentAdd}
-                                        onEnvironmentEdit={this.handleEnvironmentEdit}
-                                        onEnvironmentRemove={this.handleEnvironmentRemove}
+                                        projectId={this.props.project.get('id')}
+                                        onClose={this.handleRightPanelClose}
                                     />
                                 )}
-                                {rightPanel === 'ENVIRONMENT' && this.state.environmentEditId && (
+                                {rightPanel === 'ENVIRONMENT' && (
                                     <EnvironmentPanel
                                         width={RIGHT_PANEL_WIDTH}
                                         height={RIGHT_PANEL_HEIGHT}
-                                        environmentId={this.state.environmentEditId}
+                                        environmentId={this.props.project.get('activeEnvironmentId')}
+                                        onClose={this.handleRightPanelClose}
+                                    />
+                                )}
+                                {rightPanel === 'QUERY' && (
+                                    <QueryPanel
+                                        width={RIGHT_PANEL_WIDTH}
+                                        height={RIGHT_PANEL_HEIGHT}
+                                        queryId={this.props.project.getIn(['activeTab', 'queryId'])}
                                         onClose={this.handleRightPanelClose}
                                     />
                                 )}
@@ -405,6 +349,29 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
             )
         }
 
+        getSchema() {
+
+            const activeEnvironment = this.props.project.get('activeEnvironment')
+
+            if (!activeEnvironment) {
+                return null
+            }
+
+            let schemaResponse = activeEnvironment.get('schemaResponse')
+
+            if (!schemaResponse) {
+                return null
+            }
+
+            let schema = this.state.schemaCache.get(schemaResponse)
+
+            if (!schema) {
+                schema = buildClientSchema(JSON.parse(schemaResponse))
+            }
+
+            return schema
+        }
+
         handlePrettifyQuery = () => {
 
             const activeTab = this.props.project.get('activeTab')
@@ -430,6 +397,7 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
 
             const activeEnvironment = this.props.project.get('activeEnvironment')
             const activeTab = this.props.project.get('activeTab')
+            let query = activeTab.get('query')
 
             const startTime = moment()
 
@@ -445,41 +413,95 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
                 method: activeEnvironment.get('queryMethod'),
                 headers: applyVariablesToHeaders(this.props.project),
                 params: {
-                    query: activeTab.get('query'),
-                    operationName: activeTab.get('operationName'),
-                    variables: activeTab.get('variables')
+                    query: query.get('query'),
+                    operationName: query.get('operationName'),
+                    variables: query.get('variables')
                 }
             })
 
-            // const query = Map({
-            //     title: this.state.operationName,
-            //     type: 'HISTORY',
-            //     duration: +moment() - +startTime,
-            //     environmentId: environment.id,
-            //     operationType: null
-            // })
+            const duration = +moment() - +startTime
+            const responseString = JSON.stringify(response, null, 2)
+
+            if (query.get('type') === 'HISTORY') {
+
+                query = factories.createQuery().merge({
+                    type: 'HISTORY',
+                    title: query.get('title'),
+                    query: query.get('query'),
+                    operationType: query.get('operationType'),
+                    operationName: query.get('operationName'),
+                    variables: query.get('variables'),
+                    headers: query.get('headers'),
+                    duration,
+                    response: responseString
+                })
+
+                this.props.queriesCreate({
+                    id: query.get('id'),
+                    data: query
+                })
+
+                this.props.projectsAttachHistoryQuery({
+                    projectId: this.props.project.get('id'),
+                    queryId: query.get('id')
+                })
+
+            } else {
+
+                this.props.queriesUpdate({
+                    id: query.get('id'),
+                    data: {
+                        type: 'HISTORY',
+                        duration,
+                        response: responseString
+                    }
+                })
+            }
 
             this.props.tabsUpdate({
                 id: activeTab.get('id'),
                 data: {
-                    loading: false,
-                    response: JSON.stringify(response, null, 2)
+                    queryId: query.get('id'),
+                    loading: false
                 }
+            })
+
+            this.props.projectsAttachHistoryQuery({
+                projectId: this.props.project.get('id'),
+                queryId: query.get('id')
             })
         }
 
         handleTabAdd = () => {
 
+            const query = factories.createQuery().merge({
+                type: 'NEW'
+            })
+
             const tab = factories.createTab()
+
+            this.props.queriesCreate({
+                id: query.get('id'),
+                data: query
+            })
 
             this.props.tabsCreate({
                 id: tab.get('id'),
-                data: tab
+                data: tab.merge({
+                    queryId: query.get('id')
+                })
             })
 
             this.props.projectsAttachTab({
                 projectId: this.props.project.get('id'),
                 tabId: tab.get('id')
+            })
+
+            this.props.projectsUpdate({
+                id: this.props.project.get('id'),
+                data: {
+                    activeTabId: tab.get('id')
+                }
             })
         }
 
@@ -495,60 +517,79 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
 
         handleTabRemove = ({id}) => {
 
+            const state = store.getState()
+            const tab = selectors.findTab(state, {id})
+
             this.props.projectsDetachTab({
                 projectId: this.props.project.get('id'),
                 tabId: id
             })
 
+            // Clean up query that has never been used
+            if (tab.getIn(['query', 'type']) === 'NEW') {
+                this.props.queriesRemove({
+                    id: tab.get('queryId')
+                })
+            }
+
             this.props.tabsRemove({
                 id
             })
-        }
 
-        renderEnvironmentSelect() {
+            const tabIds = this.props.project.get('tabIds').filter(tabId => tabId !== id)
+            const activeTabId = this.props.project.get('activeTabId')
 
-            return (
-                <select ref="environment" name="environment" className="Select form-control"
-                        value={this.props.project.get('activeEnvironment')}
-                        onChange={this.handleEnvironmentChange}>
-                    {this.props.project.get('environments').map(environment => (
-                        <option
-                            key={environment.get('id')}
-                            value={environment.get('id')}
-                        >
-                            {environment.get('title')} - {environment.get('url')}
-                        </option>
-                    )).toArray()}
-                </select>
-            )
-        }
+            if (activeTabId === id && tabIds.last()) {
 
-        handleEnvironmentChange = () => {
-
-            const activeEnvironmentId = this.refs.environment.value
-
-            this.props.projectsUpdate({
-                id: this.props.project.get('id'),
-                data: {
-                    activeEnvironmentId
-                }
-            })
+                this.props.projectsUpdate({
+                    id: this.props.project.get('id'),
+                    data: {
+                        activeTabId: tabIds.last()
+                    }
+                })
+            }
         }
 
         handleEditQuery = (query) => {
 
-            this.props.tabsUpdate({
-                id: this.props.project.get('activeTabId'),
+            this.props.queriesUpdate({
+                id: this.props.project.getIn(['activeTab', 'queryId']),
                 data: {
                     query
                 }
             })
+
+            this.updateQueryFacts()
         }
+
+        updateQueryFacts = debounce(() => {
+
+            const query = this.props.project.getIn(['activeTab', 'query'])
+            console.log('query', query.toJSON())
+
+            const queryFacts = getQueryFacts(this.getSchema(), query.get('query'))
+
+            console.log('queryFacts', queryFacts)
+
+            console.log({
+                operationName: getOperationName(queryFacts),
+                operationType: getOperationType(queryFacts),
+            })
+
+            this.props.queriesUpdate({
+                id: query.get('id'),
+                data: {
+                    operationName: getOperationName(queryFacts),
+                    operationType: getOperationType(queryFacts),
+                }
+            })
+
+        }, 100)
 
         handleEditVariables = (variables) => {
 
-            this.props.tabsUpdate({
-                id: this.props.project.get('activeTabId'),
+            this.props.queriesUpdate({
+                id: this.props.project.getIn(['activeTab', 'queryId']),
                 data: {
                     variables
                 }
@@ -557,8 +598,8 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
 
         handleEditOperationName = (operationName) => {
 
-            this.props.tabsUpdate({
-                id: this.props.project.get('activeTabId'),
+            this.props.queriesUpdate({
+                id: this.props.project.getIn(['activeTab', 'queryId']),
                 data: {
                     operationName
                 }
@@ -567,66 +608,68 @@ export default ({actionCreators, selectors, factories, history, WorkspaceHeader,
 
         handleQueryClick = ({id}) => {
 
+            const state = store.getState()
+            const query = selectors.findQuery(state, {id})
+
+            const data = {
+                queryId: query.get('id')
+            }
+
+            let tab = this.props.project.get('activeTab')
+
+            if (tab) {
+
+                this.props.tabsUpdate({
+                    id: tab.get('id'),
+                    data
+                })
+            } else {
+
+                tab = factories.createTab()
+
+                this.props.tabsCreate({
+                    id: tab.get('id'),
+                    data: tab.merge(data)
+                })
+
+                this.props.projectsAttachTab({
+                    projectId: this.props.project.get('id'),
+                    tabId: tab.get('id')
+                })
+
+                this.props.projectsUpdate({
+                    id: this.props.project.get('id'),
+                    data: {
+                        activeTabId: tab.get('id')
+                    }
+                })
+            }
         }
 
         handleQueryRemove = ({id}) => {
 
+            const state = store.getState()
+            const query = selectors.findQuery(state, {id})
+
+            if (query.get('type') === 'HISTORY') {
+
+                this.props.projectsDetachHistoryQuery({
+                    projectId: this.props.project.get('id'),
+                    queryId: id
+                })
+            } else {
+
+                this.props.projectsDetachCollectionQuery({
+                    projectId: this.props.project.get('id'),
+                    queryId: id
+                })
+            }
         }
 
         handleWindowResize = () => {
             this.setState({
                 width: window.innerWidth,
                 height: window.innerHeight
-            })
-        }
-
-        handleProjectUpdate = ({project}) => {
-
-            this.props.projectsUpdate({
-                id: project.get('id'),
-                data: project.merge({
-                    rightPanel: null
-                })
-            })
-        }
-
-        handleEnvironmentAdd = ({environment}) => {
-
-            this.props.environmentsCreate({
-                id: environment.get('id'),
-                data: environment
-            })
-
-            this.props.projectsAttachEnvironment({
-                projectId: this.props.project.get('id'),
-                environmentId: environment.get('id')
-            })
-        }
-
-        handleEnvironmentEdit = ({id}) => {
-
-            this.setState({
-                environmentEditId: id
-            }, () => {
-
-                this.props.projectsUpdate({
-                    id: this.props.project.get('id'),
-                    data: {
-                        rightPanel: 'ENVIRONMENT'
-                    }
-                })
-            })
-        }
-
-        handleEnvironmentRemove = ({id}) => {
-
-            this.props.projectsDetachEnvironment({
-                projectId: this.props.project.get('id'),
-                environmentId: id
-            })
-
-            this.props.environmentsRemove({
-                id: id
             })
         }
 
