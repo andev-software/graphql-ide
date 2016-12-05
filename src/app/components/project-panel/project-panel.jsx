@@ -304,7 +304,7 @@ export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHe
             })
         }
 
-        promptEnvironmentName = () => {
+        handleEnvironmentAdd = () => {
 
             swal({
                 title: 'Add environment',
@@ -330,25 +330,19 @@ export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHe
                     return
                 }
 
-                const environment = factories.createEnvironment()
-                this.props.onEnvironmentAdd({
-                    environment: environment.merge({
-                        title: value
-                    })
+                const environment = factories.createEnvironment().merge({
+                    title: value
                 })
-            })
-        }
 
-        handleEnvironmentAdd = ({environment}) => {
+                this.props.environmentsCreate({
+                    id: environment.get('id'),
+                    data: environment
+                })
 
-            this.props.environmentsCreate({
-                id: environment.get('id'),
-                data: environment
-            })
-
-            this.props.projectsAttachEnvironment({
-                projectId: this.props.project.get('id'),
-                environmentId: environment.get('id')
+                this.props.projectsAttachEnvironment({
+                    projectId: this.props.project.get('id'),
+                    environmentId: environment.get('id')
+                })
             })
         }
 

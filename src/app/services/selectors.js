@@ -67,7 +67,7 @@ export default () => {
             title: query.get('operationName') || '<Unnamed>',
             shortname: (query.get('operationType') || "").substring(0, 2),
             meta: moment(query.get('updatedAt')).from(moment()),
-            subMeta: query.get('duration') + 'ms',
+            subMeta: query.get('duration') ? query.get('duration') + 'ms' : null,
         }))
 
         return project.merge({
