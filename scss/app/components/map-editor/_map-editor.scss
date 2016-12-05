@@ -1,0 +1,29 @@
+.MapEditor {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+
+  .NoContent {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    border-bottom: 1px solid #ddd;
+  }
+}
+
+.MapEditorFooter {
+  padding: 15px;
+}
+
+.MapItem {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 15px;
+}
+
+.MapItemFooter {
+  text-align: right;
+}

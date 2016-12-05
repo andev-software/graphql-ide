@@ -1,12 +1,31 @@
+import reduce from "lodash/reduce"
+import isEmpty from "lodash/isEmpty"
+
+function createDependencyObject(dependencies) {
+
+    return reduce(dependencies, (result, dependency, name) => {
+
+        const depName = name.split('/').pop()
+
+        if (!isEmpty(depName)) {
+            result[depName] = dependency
+            return result
+        }
+
+        return result
+
+    }, {})
+}
+
 export default () => {
 
-	let factories = {}
-	let cache = {}
+    let factories = {}
+    let cache = {}
 
     function register(options) {
-		factories[options.name] = Object.assign({}, {
+        factories[options.name] = Object.assign({}, {
             dependencies: [],
-            asMap: false
+            namedParams: false
         }, options)
     }
 
@@ -16,7 +35,7 @@ export default () => {
 
         if (!instance && factories[name]) {
 
-            const {factory, dependencies, asMap} = factories[name]
+            const {factory, dependencies, namedParams} = factories[name]
 
             let resolvedDeps = dependencies.reduce((result, depName) => {
 
@@ -40,7 +59,11 @@ export default () => {
                 throw `No factory defined for ${name}`
             }
 
-            resolvedDeps = asMap ? [resolvedDeps] : Object.keys(resolvedDeps).map(key => resolvedDeps[key])
+            if (namedParams) {
+                resolvedDeps = [createDependencyObject(resolvedDeps)]
+            } else {
+                resolvedDeps = Object.keys(resolvedDeps).map(key => resolvedDeps[key])
+            }
 
             instance = factory.apply(factory, resolvedDeps)
             cache[name] = instance
@@ -50,7 +73,7 @@ export default () => {
     }
 
     return {
-    	register,
-    	get
+        register,
+        get
     }
 }

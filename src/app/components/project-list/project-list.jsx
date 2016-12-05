@@ -1,13 +1,11 @@
 import React from "react"
-import createModal from "app/utils/create-modal"
 import electron from "electron"
 import moment from "moment"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
+import {List} from "immutable"
 
-export default (actionCreators, selectors, factories, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
-
-    ProjectFormModal = createModal(ProjectFormModal)
+export default ({vex, actionCreators, selectors, factories, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem}) => {
 
     const mapStateToProps = (state, props) => ({
         projects: selectors.allProjects(state)
@@ -16,10 +14,6 @@ export default (actionCreators, selectors, factories, importExport, history, Lay
     const mapDispatchToProps = dispatch => bindActionCreators(actionCreators, dispatch)
 
     class ProjectList extends React.Component {
-
-        ctrls = {
-            projectFormModal: null
-        }
 
         render() {
 
@@ -125,12 +119,6 @@ export default (actionCreators, selectors, factories, importExport, history, Lay
                                     </div>
                                 </div>
                             </div>
-                            <div className="overlay">
-                                <ProjectFormModal
-                                    ref={ref => this.ctrls.projectFormModal = ref}
-                                    title="Create Project"
-                                />
-                            </div>
                         </div>
                     )}
                 </Layout>
@@ -154,26 +142,57 @@ export default (actionCreators, selectors, factories, importExport, history, Lay
 
         handleRemove = ({id}) => {
 
-            mutations.removeProject({
-                projectId: id
-            }).then(() => this.fetchProjects())
+            this.props.projectsRemove({
+                id
+            })
         }
 
         handleNewClick = () => {
 
-            this.ctrls.projectFormModal.open({
-                project: factories.createProject()
-            })
-                .then(result => {
 
-                    if (result.status === 'SAVE') {
+            swal({
+                title: 'Add project',
+                text: "Choose a name for the project",
+                type: 'input',
+                showCancelButton: true,
+                closeOnConfirm: true,
+                animation: false
+            }, (value) => {
 
-                        this.props.projectsCreate({
-                            id: result.payload.input.get('id'),
-                            data: result.payload.input
-                        })
-                    }
+                if (value === false) {
+                    return
+                }
+
+                if (!value || !value.length) {
+
+                    swal({
+                        title: "Hey Ya!",
+                        text: "You might want to fill in a name!",
+                        type: "error",
+                        animation: false
+                    })
+                    return
+                }
+
+                const project = factories.createProject()
+                const environment = factories.createEnvironment()
+
+                this.props.environmentsCreate({
+                    id: environment.get('id'),
+                    data: environment
                 })
+
+                this.props.projectsCreate({
+                    id: project.get('id'),
+                    data: project.merge({
+                        title: value,
+                        activeEnvironmentId: environment.get('id'),
+                        environmentIds: List([
+                            environment.get('id')
+                        ])
+                    })
+                })
+            })
         }
     }
 

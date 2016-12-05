@@ -65,16 +65,22 @@ body {
   left: 0;
   right: 0; }
 
-.ProjectDetail__Drawer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  border-right: 1px solid #D4D4D4; }
-
-.ProjectDetail__GraphiQL {
+.ProjectDetail__Workspace {
   position: absolute;
   right: 0;
   bottom: 0; }
+
+.ProjectDetail__RightPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-left: 1px solid #D4D4D4; }
+
+.ProjectDetail__LeftPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-right: 1px solid #D4D4D4; }
 
 .ProjectList {
   position: absolute;
@@ -264,161 +270,97 @@ body {
   .HeaderSection.HeaderSection--left, .HeaderSection.HeaderSection--right {
     width: 300px; }
 
-.TopPane {
-  position: absolute;
-  right: 0;
-  left: 0;
-  border-bottom: 1px solid #D4D4D4;
-  background-color: #e6e6e6; }
-
-.TopPaneBody {
+.PanelHeader {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 38px;
-  padding: 11px 7px 11px 13px;
-  overflow-x: hidden;
-  overflow-y: scroll; }
-  .TopPaneBody .NoContent {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center; }
-    .TopPaneBody .NoContent .NoContent__Message {
-      display: inline-block;
-      opacity: 0.4; }
+  background-color: #f7f7f7;
+  height: 47px;
+  border-bottom: 1px solid #D4D4D4;
+  padding: 14px 15px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 200; }
 
-.TopPaneFooter {
+.PanelBody {
   position: absolute;
+  top: 47px;
+  bottom: 47px;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 38px;
-  background-color: #f0f0f0;
-  background: -webkit-linear-gradient(#ececec 0%, #ececec 1.9%, #e9e9e9 2%, #d2d2d2 100%);
-  border-top: 1px solid #D4D4D4;
-  border-bottom: 1px solid #b4b4b4;
-  padding: 6px 13px; }
-
-.HeaderItem {
-  display: flex;
-  margin-bottom: 10px; }
-  .HeaderItem:last-of-type {
-    margin-bottom: 0; }
-
-.HeaderItem__Key, .HeaderItem__Value {
-  display: flex;
-  width: calc(50% - 50px); }
-
-.HeaderItem__Element {
-  padding: 0 5px; }
-  .HeaderItem__Element:first-of-type {
-    padding-left: 0; }
-  .HeaderItem__Element:last-of-type {
-    padding-right: 0; }
-
-.HeaderItem__RemoveButton {
-  display: flex;
-  width: 100px; }
-  .HeaderItem__RemoveButton button {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 5px; }
-
-.VariableItem {
-  display: flex;
-  margin-bottom: 10px; }
-  .VariableItem:last-of-type {
-    margin-bottom: 0; }
-
-.VariableItem__Key, .VariableItem__Value {
-  display: flex;
-  width: calc(50% - 50px); }
-
-.VariableItem__Element {
-  padding: 0 5px; }
-  .VariableItem__Element:first-of-type {
-    padding-left: 0; }
-  .VariableItem__Element:last-of-type {
-    padding-right: 0; }
-
-.VariableItem__RemoveButton {
-  display: flex;
-  width: 100px; }
-  .VariableItem__RemoveButton button {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 5px; }
-
-.EndpointsEditor {
-  position: relative;
-  padding-bottom: 38px;
-  border: 1px solid #D4D4D4;
-  border-radius: 5px;
-  background-color: #fafafa; }
-
-.EndpointsEditorBody {
-  padding: 11px 7px 11px 13px;
+  background-color: #ffffff;
   overflow-x: hidden;
   overflow-y: scroll;
-  position: relative;
-  min-height: 43px; }
-  .EndpointsEditorBody .NoEndpoints {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center; }
-    .EndpointsEditorBody .NoEndpoints .NoEndpoints__Message {
-      display: inline-block;
-      opacity: 0.4; }
+  padding: 20px 15px; }
 
-.EndpointsEditorFooter {
+.PanelFooter {
   position: absolute;
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 38px;
-  background-color: #f0f0f0;
+  background-color: #f7f7f7;
+  height: 47px;
   border-top: 1px solid #D4D4D4;
-  padding: 6px 13px; }
+  padding: 8px 15px;
+  text-align: right; }
 
-.EndpointsItem {
-  display: flex;
-  margin-bottom: 10px; }
-  .EndpointsItem:last-of-type {
-    margin-bottom: 0; }
+.EnvironmentList {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px; }
 
-.EndpointsItem__Title, .EndpointsItem__Url {
-  display: flex;
-  width: calc(50% - 50px); }
+.EnvironmentItem {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 15px; }
 
-.EndpointsItem__Default .checkbox {
-  margin-top: 3px;
-  margin-bottom: 3px; }
+.EnvironmentFooter {
+  padding: 15px;
+  text-align: right; }
 
-.EndpointsItem__Element {
-  padding: 0 5px; }
-  .EndpointsItem__Element:first-of-type {
-    padding-left: 0; }
-  .EndpointsItem__Element:last-of-type {
-    padding-right: 0; }
+.UrlEditor {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px; }
 
-.EndpointsItem__RemoveButton {
-  display: flex;
-  width: 100px; }
-  .EndpointsItem__RemoveButton button {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 5px; }
+.UrlEditorSection {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 15px; }
+
+.UrlEditorFooter {
+  padding: 15px; }
+
+.MapEditor {
+  position: relative;
+  display: block;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px; }
+  .MapEditor .NoContent {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    border-bottom: 1px solid #ddd; }
+
+.MapEditorFooter {
+  padding: 15px; }
+
+.MapItem {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 15px; }
+
+.MapItemFooter {
+  text-align: right; }
 
 .Menu {
   display: flex;

@@ -56,6 +56,7 @@ export default () => {
 
     return {
         allProjects,
-        findProject
+        findProject,
+        findEnvironment
     }
 }

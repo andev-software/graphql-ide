@@ -9,7 +9,8 @@ var options = {
             'babel-polyfill',
             'react',
             'react-dom',
-            'react-router'
+            'react-router',
+            'sweetalert/dist/sweetalert.css'
         ],
         app: [
             './src/index.jsx'

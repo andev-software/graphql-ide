@@ -1,9 +1,9 @@
 import React from "react"
 import {Map} from "immutable"
 
-export default (VariableItem) => {
+export default (MapItem) => {
 
-    return class VariableEditor extends React.Component {
+    return class MapEditor extends React.Component {
 
         state = {
             value: Map()
@@ -30,7 +30,7 @@ export default (VariableItem) => {
 
             return (
                 <div
-                    className="VariableEditor TopPane"
+                    className="MapEditor"
                     style={{
                         top: this.props.top,
                         width: this.props.width,
@@ -38,19 +38,13 @@ export default (VariableItem) => {
                     }}
                 >
                     {this.state.value.size ? (
-                        <div className="VariableEditorBody TopPaneBody">
+                        <div className="list-group-items">
                             {this.state.value.map((value, key, map) => {
 
                                 const index = map.keySeq().indexOf(key)
 
-                                console.log({
-                                    key,
-                                    value,
-                                    index
-                                })
-
                                 return (
-                                    <VariableItem
+                                    <MapItem
                                         key={index}
                                         id={key}
                                         value={value}
@@ -62,33 +56,31 @@ export default (VariableItem) => {
                             }).toArray()}
                         </div>
                     ) : (
-                        <div className="VariableEditorBody TopPaneBody">
+                        <div className="MapEditorBody">
                             <div className="NoContent">
                                 <div className="NoContent__Message">
-                                    No variables (yet)
+                                    {this.props.noContentMessage}
                                 </div>
                             </div>
                         </div>
                     )}
-                    <div className="VariableEditorFooter TopPaneFooter">
+                    <div className="MapEditorFooter">
                         <div className="Menu--horizontal Menu--right">
                             <div className="MenuItem">
-                                <button
-                                    type="button"
-                                    className="button"
+                                <a
+                                    href="javascript:void(0)"
                                     onClick={this.handleClearClick}
                                 >
-                                    Clear variables
-                                </button>
+                                    Clear
+                                </a>
                             </div>
                             <div className="MenuItem">
-                                <button
-                                    type="button"
-                                    className="button"
+                                <a
+                                    href="javascript:void(0)"
                                     onClick={this.handleAddClick}
                                 >
-                                    Add variable
-                                </button>
+                                    Add
+                                </a>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,53 @@
+import omitBy from "lodash/omitBy"
+import isEmpty from "lodash/isEmpty"
+import isNil from "lodash/isNil"
+import merge from "lodash/merge"
+import querystring from "querystring"
+import {introspectionQuery} from "graphql"
+
 export default (db) => {
+
+    function fetchSchema({url, method}) {
+
+        return fetchQuery({
+            url,
+            method,
+            params: {
+                query: introspectionQuery
+            }
+        })
+    }
+
+    function fetchQuery({params, url, method, headers}) {
+
+        params = omitBy(params, isNil)
+        params = omitBy(params, isEmpty)
+
+        let options = {
+            method,
+            credentials: 'include'
+        }
+
+        if (method == "GET") {
+
+            options.headers = merge({}, headers)
+
+            url += url.indexOf('?') == -1 ? "?" : "&"
+
+            url += querystring.stringify(params)
+        }
+
+        else {
+
+            options.headers = merge({
+                'content-type': 'application/json'
+            }, headers)
+
+            options.body = JSON.stringify(params)
+        }
+
+        return fetch(url, options).then(res => res.json())
+    }
 
     function allProjects() {
 
@@ -65,6 +114,8 @@ export default (db) => {
     }
 
     return {
+        fetchSchema,
+        fetchQuery,
         allProjects,
         findProject,
         findProjectQueries,

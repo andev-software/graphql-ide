@@ -1,10 +1,11 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import cn from "classnames"
+import {FormGroup, FormControl, ControlLabel} from "react-bootstrap"
 
 export default () => {
 
-    return class VariableItem extends React.Component {
+    return class MapItem extends React.Component {
 
         componentDidMount() {
 
@@ -16,31 +17,36 @@ export default () => {
         render() {
 
             return (
-                <div className="VariableItem">
-                    <div className="VariableItem__Element VariableItem__Key">
-                        <input
-                            ref="key"
-                            className={cn("Input", {error: this.props.invalid})}
+                <div className="MapItem">
+                    <FormGroup
+                        controlId="key"
+                    >
+                        <FormControl
+                            ref="title"
+                            type="text"
                             value={this.props.id}
+                            placeholder="key"
                             onChange={this.handleKeyChange}
                         />
-                    </div>
-                    <div className="VariableItem__Element VariableItem__Value">
-                        <input
-                            ref="value"
-                            className="Input"
+                    </FormGroup>
+                    <FormGroup
+                        controlId="key"
+                    >
+                        <FormControl
+                            ref="title"
+                            type="text"
                             value={this.props.value}
+                            placeholder="value"
                             onChange={this.handleValueChange}
                         />
-                    </div>
-                    <div className="VariableItem__Element VariableItem__RemoveButton">
-                        <button
-                            type="button"
-                            className="button"
+                    </FormGroup>
+                    <div className="MapItemFooter">
+                        <a
+                            href="javascript:void(0)"
                             onClick={this.handleRemove}
                         >
                             Remove
-                        </button>
+                        </a>
                     </div>
                 </div>
             )
@@ -51,7 +57,7 @@ export default () => {
             this.props.onKeyChange({
                 e,
                 id: this.props.id,
-                key: this.refs.key.value
+                key: e.target.value
             })
         }
 
@@ -60,7 +66,7 @@ export default () => {
             this.props.onValueChange({
                 e,
                 id: this.props.id,
-                value: this.refs.value.value
+                value: e.target.value
             })
         }
 

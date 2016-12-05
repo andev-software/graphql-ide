@@ -44,8 +44,10 @@
     "redux-logger": "^2.7.4",
     "redux-thunk": "^2.1.0",
     "snake-case": "^2.1.0",
+    "sweetalert": "^1.1.3",
     "uuid": "^3.0.0",
-    "validator": "^6.1.0"
+    "validator": "^6.1.0",
+    "vex-js": "^3.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.18.2",

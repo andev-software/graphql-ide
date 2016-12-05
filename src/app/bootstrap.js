@@ -152,25 +152,6 @@ export default di => {
     })
 
     di.register({
-        name: 'app/components/projectEditModal/ProjectEditModal',
-        dependencies: [
-            'app/services/store',
-            'app/services/selectors',
-            'app/services/actionCreators',
-            'app/components/projectFormModal/ProjectFormModal'
-        ],
-        factory: require('app/components/project-edit-modal/project-edit-modal').default
-    })
-
-    di.register({
-        name: 'app/components/projectFormModal/ProjectFormModal',
-        dependencies: [
-            'app/components/endpointsEditor/EndpointsEditor'
-        ],
-        factory: require('app/components/project-form-modal/project-form-modal').default
-    })
-
-    di.register({
         name: 'app/components/graphiql/GraphiQL',
         dependencies: [],
         factory: require('app/components/graphiql/graphiql').default
@@ -191,6 +172,61 @@ export default di => {
     })
 
     di.register({
+        name: 'app/components/projectPanel/ProjectPanel',
+        dependencies: [
+            'app/services/factories',
+            'app/components/mapEditor/MapEditor',
+            'app/components/panel/Panel',
+            'app/components/panel/PanelHeader',
+            'app/components/panel/PanelBody',
+            'app/components/panel/PanelFooter'
+        ],
+        namedParams: true,
+        factory: require('app/components/project-panel/project-panel').default
+    })
+
+    di.register({
+        name: 'app/components/environmentPanel/EnvironmentPanel',
+        dependencies: [
+            'app/services/actionCreators',
+            'app/services/selectors',
+            'app/services/queries',
+            'app/components/mapEditor/MapEditor',
+            'app/components/panel/Panel',
+            'app/components/panel/PanelHeader',
+            'app/components/panel/PanelBody',
+            'app/components/panel/PanelFooter'
+        ],
+        namedParams: true,
+        factory: require('app/components/environment-panel/environment-panel').default
+    })
+
+    di.register({
+        name: 'app/components/panel/Panel',
+        dependencies: [],
+        factory: require('app/components/panel/panel').default
+    })
+
+    di.register({
+        name: 'app/components/panel/PanelHeader',
+        dependencies: [],
+        factory: require('app/components/panel/panel-header').default
+    })
+
+    di.register({
+        name: 'app/components/panel/PanelBody',
+        dependencies: [],
+        factory: require('app/components/panel/panel-body').default
+    })
+
+    di.register({
+        name: 'app/components/panel/PanelFooter',
+        dependencies: [],
+        factory: require('app/components/panel/panel-footer').default
+    })
+
+
+    di.register({
         name: 'app/components/workspace/WorkspaceHeader',
         dependencies: [],
         factory: require('app/components/workspace/workspace-header').default
@@ -202,48 +238,18 @@ export default di => {
         factory: require('app/components/workspace/menu-item').default
     })
 
-
     di.register({
-        name: 'app/components/headerEditor/HeaderItem',
+        name: 'app/components/mapEditor/MapItem',
         dependencies: [],
-        factory: require('app/components/header-editor/header-item').default
+        factory: require('app/components/map-editor/map-item').default
     })
 
     di.register({
-        name: 'app/components/headerEditor/HeaderEditor',
+        name: 'app/components/mapEditor/MapEditor',
         dependencies: [
-            'app/components/headerEditor/HeaderItem'
+            'app/components/mapEditor/MapItem'
         ],
-        factory: require('app/components/header-editor/header-editor').default
-    })
-
-    di.register({
-        name: 'app/components/variableEditor/VariableItem',
-        dependencies: [],
-        factory: require('app/components/variable-editor/variable-item').default
-    })
-
-    di.register({
-        name: 'app/components/variableEditor/VariableEditor',
-        dependencies: [
-            'app/components/variableEditor/VariableItem'
-        ],
-        factory: require('app/components/variable-editor/variable-editor').default
-    })
-
-
-    di.register({
-        name: 'app/components/endpointsEditor/EndpointsItem',
-        dependencies: [],
-        factory: require('app/components/endpoints-editor/endpoints-item').default
-    })
-
-    di.register({
-        name: 'app/components/endpointsEditor/EndpointsEditor',
-        dependencies: [
-            'app/components/endpointsEditor/EndpointsItem'
-        ],
-        factory: require('app/components/endpoints-editor/endpoints-editor').default
+        factory: require('app/components/map-editor/map-editor').default
     })
 
     di.register({
@@ -253,17 +259,15 @@ export default di => {
             'app/services/selectors',
             'app/services/factories',
             'app/services/history',
-            'app/components/loader/Loader',
-            'app/components/layout/Layout',
             'app/components/workspace/WorkspaceHeader',
             'app/components/workspace/MenuItem',
-            'app/components/variableEditor/VariableEditor',
-            'app/components/headerEditor/HeaderEditor',
             'app/components/queryList/QueryList',
             'app/components/tabs/Tabs',
             'app/components/graphiql/GraphiQL',
-            'app/components/projectEditModal/ProjectEditModal'
+            'app/components/projectPanel/ProjectPanel',
+            'app/components/environmentPanel/EnvironmentPanel'
         ],
+        namedParams: true,
         factory: require('app/components/project-detail/project-detail').default
     })
 
@@ -278,9 +282,9 @@ export default di => {
             'app/components/layout/Layout',
             'app/components/workspace/WorkspaceHeader',
             'app/components/workspace/MenuItem',
-            'app/components/projectList/ProjectListItem',
-            'app/components/projectFormModal/ProjectFormModal'
+            'app/components/projectList/ProjectListItem'
         ],
+        namedParams: true,
         factory: require('app/components/project-list/project-list').default
     })
 

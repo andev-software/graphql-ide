@@ -8,7 +8,7 @@ export default () => {
 
             return Map({
                 id: uuid.v4(),
-                title: '',
+                title: 'Default',
                 url: '',
                 queryMethod: 'POST',
                 variables: Map({}),
@@ -24,7 +24,6 @@ export default () => {
                 description: '',
                 activeEnvironmentId: null,
                 activeTabId: null,
-                topPanel: null,
                 leftPanel: null,
                 rightPanel: null,
                 headers: Map(),
