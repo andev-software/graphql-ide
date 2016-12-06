@@ -185,24 +185,100 @@ export default (mutations, queries) => {
 
     function exportVersionOneProject({projectId}) {
 
+        const projectUUID = uuid.v4()
 
-        let output = {
-            version: "0.2",
+        let data = Map({
+            app: Map({
+                version: "0.2"
+            }),
+            dataStore: Map({
+                projectsById: Map(),
+                projects: List([
+                    projectUUID
+                ]),
+                environmentsById: Map(),
+                environments: List(),
+                queriesById: Map(),
+                queries: List()
+            })
+        })
 
-        }
+        function processEndpoints(endpoints) {
 
-        function processProject(projectId) {
-            return queries.findProject({projectId}).then((project) => {
-                output.project = project
+            const environmentIds = endpoints.map(endpoint => {
+
+                const environmentId = uuid.v4()
+
+                data = data.setIn(['dataStore', 'environmentsById', environmentId], Map({
+                    id: environmentId,
+                    title: endpoint.title,
+                    url: endpoint.url,
+                    queryMethod: 'POST',
+                    variables: Map()
+                }))
+
+                return environmentId
+            })
+
+            data = data.setIn(['dataStore', 'environments'], environmentIds)
+
+            data = data.updateIn(['dataStore', 'projectsById', projectUUID], project => {
+                return project.set('environmentIds', environmentIds)
             })
         }
 
-        function processQueries(projectId) {
+        function processProject() {
+            return queries.findProject({projectId}).then((project) => {
+
+                data = data.setIn(['dataStore', 'projectsById', projectUUID], Map({
+                    id: projectUUID,
+                    title: project.title,
+                    description: project.description,
+                    activeEnvironmentId: null,
+                    environmentIds: List(),
+                    collectionQueryIds: List(),
+                    headers: Map()
+                }))
+
+                processEndpoints(project.endpoints)
+            })
+        }
+
+        function processQueries() {
             return queries.findProjectQueries({
                 projectId,
                 type: 'COLLECTION'
             }).then(queries => {
-                output.project.queries = queries
+
+                const queryIds = queries.map(query => {
+
+                    let headers = Map()
+
+                    query.headers.forEach(header => {
+                        headers = headers.set(header.key, header.value)
+                    })
+
+                    const queryId = uuid.v4()
+                    data = data.setIn(['dataStore', 'queriesById', queryId], Map({
+                        id: queryId,
+                        operationName: query.operationName,
+                        operationType: query.operationType,
+                        headers: headers,
+                        query: query.query,
+                        updatedAt: query.updatedAt,
+                        createdAt: query.createdAt,
+                        variables: JSON.stringify(query.variables),
+                        type: query.type
+                    }))
+
+                    return queryId
+                })
+
+                data = data.setIn(['dataStore', 'queries'], queryIds)
+
+                data = data.updateIn(['dataStore', 'projectsById', projectUUID], project => {
+                    return project.set('collectionQueryIds', queryIds)
+                })
             })
         }
 
@@ -229,7 +305,7 @@ export default (mutations, queries) => {
 
             return new Promise((resolve, reject) => {
 
-                const data = JSON.stringify(output, null, 4)
+                data = JSON.stringify(data, null, 4)
 
                 fs.writeFile(filePath, data, (err, result) => {
 
@@ -243,8 +319,8 @@ export default (mutations, queries) => {
             })
         }
 
-        return processProject(projectId)
-            .then(() => processQueries(projectId))
+        return processProject()
+            .then(() => processQueries())
             .then(promptSaveDialog)
             .then(filePath => {
 
