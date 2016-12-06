@@ -266,12 +266,16 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
             const activeTab = this.props.project.get('activeTab')
 
-            let variableToType = this.state.variableToTypeCache.get(activeTab.getIn(['query', 'id']))
+            let variableToType
 
-            if (!variableToType) {
-                const queryFacts = getQueryFacts(this.getSchema(), activeTab.getIn(['query', 'query']))
-                variableToType = queryFacts && queryFacts.variableToType
-                this.state.variableToTypeCache.set(activeTab.getIn(['query', 'id']), variableToType)
+            if (activeTab) {
+                this.state.variableToTypeCache.get(activeTab.getIn(['query', 'id']))
+
+                if (!variableToType) {
+                    const queryFacts = getQueryFacts(this.getSchema(), activeTab.getIn(['query', 'query']))
+                    variableToType = queryFacts && queryFacts.variableToType
+                    this.state.variableToTypeCache.set(activeTab.getIn(['query', 'id']), variableToType)
+                }
             }
 
             const schema = this.getSchema()
@@ -619,7 +623,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
         closeTab = () => {
 
-            const activeTabId = this.props.project.get('activeTabId')
+            const activeTabId = this.props.project.getIn(['activeTab', 'id'])
 
             if (!activeTabId) {
                 return
