@@ -8,7 +8,7 @@ const {remote} = electron
 import fs from "fs"
 import {buildClientSchema} from 'graphql'
 
-export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHeader, PanelBody, PanelFooter}) => {
+export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHeader, PanelBody}) => {
 
     const mapStateToProps = (state, props) => ({
         environment: selectors.findEnvironment(state, {id: props.environmentId})

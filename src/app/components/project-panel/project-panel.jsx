@@ -1,13 +1,10 @@
-import validator from "validator"
 import React from "react"
-import ReactDOM from "react-dom"
 import {Alert, Modal, FormGroup, FormControl, ControlLabel} from "react-bootstrap"
-import {Map, List} from "immutable"
 import swal from "sweetalert"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
 
-export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHeader, PanelBody, PanelFooter}) => {
+export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHeader, PanelBody}) => {
 
     const mapStateToProps = (state, props) => ({
         project: selectors.findProject(state, {id: props.projectId})

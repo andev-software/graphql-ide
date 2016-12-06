@@ -9,6 +9,13 @@ export default di => {
     })
 
     di.register({
+        name: 'app/config',
+        dependencies: [],
+        factory: require('app/config').default
+    })
+
+
+    di.register({
         name: 'app/handlers/setupMenu',
         dependencies: [
             'app/services/store'
@@ -117,9 +124,11 @@ export default di => {
     di.register({
         name: 'app/services/importExport',
         dependencies: [
-            'app/services/mutations',
-            'app/services/queries'
+            'app/services/store',
+            'app/config',
+            'app/services/factories'
         ],
+        namedParams: true,
         factory: require('app/services/import-export').default
     })
 
@@ -179,8 +188,7 @@ export default di => {
             'app/components/mapEditor/MapEditor',
             'app/components/panel/Panel',
             'app/components/panel/PanelHeader',
-            'app/components/panel/PanelBody',
-            'app/components/panel/PanelFooter'
+            'app/components/panel/PanelBody'
         ],
         namedParams: true,
         factory: require('app/components/project-panel/project-panel').default
@@ -210,8 +218,7 @@ export default di => {
             'app/components/mapEditor/MapEditor',
             'app/components/panel/Panel',
             'app/components/panel/PanelHeader',
-            'app/components/panel/PanelBody',
-            'app/components/panel/PanelFooter'
+            'app/components/panel/PanelBody'
         ],
         namedParams: true,
         factory: require('app/components/environment-panel/environment-panel').default

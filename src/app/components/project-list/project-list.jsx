@@ -125,7 +125,7 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
 
         handleProjectImport = () => {
 
-            importExport.importProject().then(() => this.fetchProjects())
+            importExport.importProject()
         }
 
         handleProjectExport = ({id}) => {

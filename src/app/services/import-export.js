@@ -2,172 +2,359 @@ import moment from "moment"
 import fs from "fs"
 import electron from "electron"
 const {remote} = electron
-import getDefined from "app/utils/get-defined"
+import concat from "lodash/concat"
+import uuid from "uuid"
+import promisify from "es6-promisify"
+import {Map, List, fromJS} from "immutable"
+import replace from "lodash/replace"
 
-export default (mutations, queries) => {
+const errorPad = fn => (input, cb) => {
+    fn(input, (value) => cb(null, value))
+}
+const showSaveDialog = promisify(errorPad(remote.dialog.showSaveDialog))
+const showOpenDialog = promisify(errorPad(remote.dialog.showOpenDialog))
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
 
-    function promptSaveDialog() {
+function parseJSON(input) {
 
-        const filename = 'graphiql_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
+    try {
+        return JSON.parse(input)
+    } catch (e) {
+        return null
+    }
+}
+
+export default ({store, config, factories}) => {
+
+    async function processImport(data) {
+
+        data = data.dataStore
+
+        // Gather all id's
+        const ids = concat(
+            data.projects,
+            data.environments,
+            data.queries
+        )
+
+        // Replace all id instances with new ones
+        // to prevent conflicting data
+        let source = JSON.stringify(data)
+
+        ids.forEach(id => {
+            source = replace(source, new RegExp(id, "g"), uuid.v4())
+        })
+
+        data = JSON.parse(source)
+
+        data = fromJS(data)
+
+        data = data.update('projectsById', projects => {
+            return projects.map(project => {
+                return factories.createProject().merge(project)
+            })
+        })
+
+        data = data.update('environmentsById', environments => {
+            return environments.map(environment => {
+                return factories.createEnvironment().merge(environment)
+            })
+        })
+
+        data = data.update('queriesById', queries => {
+            return queries.map(query => {
+                return factories.createQuery().merge(query)
+            })
+        })
+
+        store.dispatch({
+            type: 'IMPORT',
+            payload: data
+        })
+    }
+
+    async function importProject() {
+
         const downloadsPath = remote.app.getPath('downloads')
 
-        return new Promise((resolve, reject) => {
-
-            remote.dialog.showSaveDialog({
-                defaultPath: downloadsPath + '/' + filename,
-                filters: [{
-                    name: 'JSON',
-                    extensions: ['json']
-                }]
-            }, (result) => {
-                resolve(result)
-            })
+        const filepaths = await showOpenDialog({
+            defaultPath: downloadsPath,
+            filters: [{
+                name: 'JSON',
+                extensions: ['json']
+            }]
         })
-    }
 
-    function saveFile(filePath, data) {
-
-        return new Promise((resolve, reject) => {
-
-            data = JSON.stringify(data, null, 4)
-
-            fs.writeFile(filePath, data, (err, result) => {
-
-                if (err) {
-                    reject(err)
-                    return
-                }
-
-                resolve(result)
-            })
-        })
-    }
-
-    function importProject() {
-
-        function promptChooseFile() {
-
-            const downloadsPath = remote.app.getPath('downloads')
-
-            return new Promise((resolve, reject) => {
-
-                remote.dialog.showOpenDialog({
-                    defaultPath: downloadsPath,
-                    filters: [{
-                        name: 'JSON',
-                        extensions: ['json']
-                    }]
-                }, (result) => {
-                    resolve(result)
-                })
-            })
+        // User canceled the selection
+        if (!filepaths) {
+            return
         }
 
-        function readFile(filepath) {
-
-            return new Promise((resolve, reject) => {
-
-                fs.readFile(filepath, 'utf-8', (err, result) => {
-
-                    if (err) {
-                        reject(err)
-                        return
-                    }
-
-                    resolve(result)
-                })
-            })
-        }
-
-        function readEndpoint(endpoint) {
-            return getDefined(endpoint, [
-                'id',
-                'title',
-                'url',
-                'isDefault'
-            ])
-        }
-
-        function readProject(project) {
-
-            const result = getDefined(project, [
-                'title',
-                'description',
-                'variables',
-                'settings'
-            ])
-
-            result.endpoints = project.endpoints.map(readEndpoint)
-            return result
-        }
-
-        function readQuery(query) {
-
-            return getDefined(query, [
-                'title',
-                'method',
-                'type',
-                'createdAt',
-                'endpointId',
-                'operationName',
-                'query',
-                'variables',
-                'headers',
-                'duration',
-                'operationType'
-            ])
-        }
-
-        function processImportData(data) {
-
-            return mutations.createProject({
-                input: readProject(data.project)
-            })
-                .then(project => {
-
-                    const promises = data.project.queries.map(query => {
-
-                        query = readQuery(query)
-
-                        return mutations.createQuery({
-                            projectId: project._id,
-                            input: query
-                        })
-                    })
-
-                    return Promise.all(promises)
-                })
-        }
-
-        return promptChooseFile()
-            .then(filepaths => {
-
-                return Promise.all(filepaths.map(filepath => {
-
-                    return readFile(filepath)
-                        .then(data => JSON.parse(data))
-                        .then(data => processImportData(data))
-                }))
-            })
+        return await Promise.all(filepaths.map(filepath => {
+            return readFile(filepath, 'utf-8')
+                .then(parseJSON)
+                .then(processImport)
+        }))
     }
 
     async function exportProject({projectId}) {
 
-        const project = await queries.findProject({projectId})
+        const filename = 'graphql_ide_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
+        const downloadsPath = remote.app.getPath('downloads')
 
-        project.queries = await queries.findProjectQueries({
-            projectId,
-            type: 'COLLECTION'
+        const filePath = await showSaveDialog({
+            defaultPath: downloadsPath + '/' + filename,
+            filters: [{
+                name: 'JSON',
+                extensions: ['json']
+            }]
         })
 
-        const filePath = await promptSaveDialog()
+        const state = store.getState()
+
+        let data = Map({
+            app: Map({
+                version: config.get('version')
+            }),
+            dataStore: Map({
+                projectsById: Map(),
+                projects: List(),
+                environmentsById: Map(),
+                environments: List(),
+                queriesById: Map(),
+                queries: List()
+            })
+        })
+
+        const project = state.getIn(['dataStore', 'projectsById', projectId])
+
+        if (!project) {
+            swal("Error", "Could not export project", "error")
+            return
+        }
+
+        data = data.setIn(['dataStore', 'projectsById', projectId], Map({
+            id: project.get('id'),
+            title: project.get('title'),
+            description: project.get('description'),
+            activeEnvironmentId: project.get('activeEnvironmentId'),
+            environmentIds: project.get('environmentIds'),
+            collectionQueryIds: project.get('collectionQueryIds'),
+            headers: project.get('headers'),
+        }))
+
+        data = data.updateIn(['dataStore', 'projects'], projects => {
+            return projects.push(project.get('id'))
+        })
+
+        project.get('environmentIds').forEach(id => {
+
+            const environment = state.getIn(['dataStore', 'environmentsById', id])
+
+            data = data.setIn(['dataStore', 'environmentsById', id], Map({
+                id: environment.get('id'),
+                title: environment.get('title'),
+                url: environment.get('url'),
+                queryMethod: environment.get('queryMethod'),
+                variables: environment.get('variables')
+            }))
+
+            data = data.updateIn(['dataStore', 'environments'], environments => {
+                return environments.push(id)
+            })
+        })
+
+        project.get('collectionQueryIds').forEach(id => {
+
+            const query = state.getIn(['dataStore', 'queriesById', id])
+
+            data = data.setIn(['dataStore', 'queriesById', id], Map({
+                id: query.get('id'),
+                type: query.get('type'),
+                operationName: query.get('operationName'),
+                operationType: query.get('operationType'),
+                query: query.get('query'),
+                variables: query.get('variables'),
+                headers: query.get('headers'),
+                updatedAt: query.get('updatedAt'),
+                createdAt: query.get('createdAt')
+            }))
+
+            data = data.updateIn(['dataStore', 'queries'], queries => {
+                return queries.push(id)
+            })
+        })
+
+        data = JSON.stringify(data, null, 4)
 
         if (filePath) {
-            return await saveFile(filePath, {
-                project
-            })
+            return await writeFile(filePath, data)
         }
     }
+
+    // function promptSaveDialog() {
+    //
+    //     const filename = 'graphql_ide_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
+    //     const downloadsPath = remote.app.getPath('downloads')
+    //
+    //     return new Promise((resolve, reject) => {
+    //
+    //         remote.dialog.showSaveDialog({
+    //             defaultPath: downloadsPath + '/' + filename,
+    //             filters: [{
+    //                 name: 'JSON',
+    //                 extensions: ['json']
+    //             }]
+    //         }, (result) => {
+    //             resolve(result)
+    //         })
+    //     })
+    // }
+    //
+    // function saveFile(filePath, data) {
+    //
+    //     return new Promise((resolve, reject) => {
+    //
+    //         data = JSON.stringify(data, null, 4)
+    //
+    //         fs.writeFile(filePath, data, (err, result) => {
+    //
+    //             if (err) {
+    //                 reject(err)
+    //                 return
+    //             }
+    //
+    //             resolve(result)
+    //         })
+    //     })
+    // }
+    //
+    // function importProject() {
+    //
+    //     function promptChooseFile() {
+    //
+    //         const downloadsPath = remote.app.getPath('downloads')
+    //
+    //         return new Promise((resolve, reject) => {
+    //
+    //             remote.dialog.showOpenDialog({
+    //                 defaultPath: downloadsPath,
+    //                 filters: [{
+    //                     name: 'JSON',
+    //                     extensions: ['json']
+    //                 }]
+    //             }, (result) => {
+    //                 resolve(result)
+    //             })
+    //         })
+    //     }
+    //
+    //     function readFile(filepath) {
+    //
+    //         return new Promise((resolve, reject) => {
+    //
+    //             fs.readFile(filepath, 'utf-8', (err, result) => {
+    //
+    //                 if (err) {
+    //                     reject(err)
+    //                     return
+    //                 }
+    //
+    //                 resolve(result)
+    //             })
+    //         })
+    //     }
+    //
+    //     function readEndpoint(endpoint) {
+    //         return getDefined(endpoint, [
+    //             'id',
+    //             'title',
+    //             'url',
+    //             'isDefault'
+    //         ])
+    //     }
+    //
+    //     function readProject(project) {
+    //
+    //         const result = getDefined(project, [
+    //             'title',
+    //             'description',
+    //             'variables',
+    //             'settings'
+    //         ])
+    //
+    //         result.endpoints = project.endpoints.map(readEndpoint)
+    //         return result
+    //     }
+    //
+    //     function readQuery(query) {
+    //
+    //         return getDefined(query, [
+    //             'title',
+    //             'method',
+    //             'type',
+    //             'createdAt',
+    //             'endpointId',
+    //             'operationName',
+    //             'query',
+    //             'variables',
+    //             'headers',
+    //             'duration',
+    //             'operationType'
+    //         ])
+    //     }
+    //
+    //     function processImportData(data) {
+    //
+    //         return mutations.createProject({
+    //             input: readProject(data.project)
+    //         })
+    //             .then(project => {
+    //
+    //                 const promises = data.project.queries.map(query => {
+    //
+    //                     query = readQuery(query)
+    //
+    //                     return mutations.createQuery({
+    //                         projectId: project._id,
+    //                         input: query
+    //                     })
+    //                 })
+    //
+    //                 return Promise.all(promises)
+    //             })
+    //     }
+    //
+    //     return promptChooseFile()
+    //         .then(filepaths => {
+    //
+    //             return Promise.all(filepaths.map(filepath => {
+    //
+    //                 return readFile(filepath)
+    //                     .then(data => JSON.parse(data))
+    //                     .then(data => processImportData(data))
+    //             }))
+    //         })
+    // }
+    //
+    // async function exportProject({projectId}) {
+    //
+    //     const project = await queries.findProject({projectId})
+    //
+    //     project.queries = await queries.findProjectQueries({
+    //         projectId,
+    //         type: 'COLLECTION'
+    //     })
+    //
+    //     const filePath = await promptSaveDialog()
+    //
+    //     if (filePath) {
+    //         return await saveFile(filePath, {
+    //             project
+    //         })
+    //     }
+    // }
 
     return {
         exportProject,
