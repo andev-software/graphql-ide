@@ -11,6 +11,10 @@
   background: rgba(255, 255, 255, .08)
 }
 
+body {
+  overflow: hidden;
+}
+
 .app-wrapper-main::-webkit-scrollbar-track {
   background-color: #dfdfdf;
 }

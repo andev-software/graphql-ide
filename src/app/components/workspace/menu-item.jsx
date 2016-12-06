@@ -10,12 +10,13 @@ export default () => {
             return (
                 <div
                     className="MenuItem"
-                    onClick={this.props.onClick}
                 >
                     <button
+                        disabled={this.props.disabled}
                         className={cn('button', {
                             active: this.props.active
                         })}
+                        onClick={this.props.onClick}
                     >
                         <span className="Label">
                             {this.props.description}

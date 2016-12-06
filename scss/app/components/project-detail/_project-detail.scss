@@ -12,16 +12,42 @@
   right: 0;
 }
 
-.ProjectDetail__Drawer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  border-right: 1px solid $border-color;
-}
-
-.ProjectDetail__GraphiQL {
+.ProjectDetail__Workspace {
 
   position: absolute;
   right: 0;
   bottom: 0;
+}
+
+.Workspace__Empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background-color: #fafafa;
+}
+
+.Workspace__EmptyMessage {
+  display: flex;
+  color: #888;
+  padding: 0 50px;
+  text-align: center;
+}
+
+.ProjectDetail__RightPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-left: 1px solid $border-color;
+}
+
+.ProjectDetail__LeftPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-right: 1px solid $border-color;
 }

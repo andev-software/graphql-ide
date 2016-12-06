@@ -1,0 +1,144 @@
+.Tabs {
+  width: 100%;
+  height: 34px;
+  background: #d0d0d0;
+  overflow: hidden;
+  border-radius: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  border-bottom: 1px solid #b4b4b4;
+}
+
+.TabElement {
+  position: relative;
+  display: inline-block;
+  background-color: #d0d0d0;
+  color: #222222;
+  padding: 9px 10px;
+  margin: 0;
+  font-size: 11px;
+  transition: background-color 50ms ease-in-out;
+  align-items: center;
+  cursor: pointer;
+  border-right: 1px solid #b4b4b4;
+
+  &:hover {
+    background-color: #f2f2f2;
+  }
+
+  &.active {
+    background-color: #f2f2f2;
+  }
+}
+
+.TabItem {
+  max-width: 200px;
+  padding-right: 24px;
+
+  &:hover {
+    .Title {
+      background-color: #f2f2f2;
+    }
+  }
+
+  &.active {
+    .Title {
+      background-color: #f2f2f2;
+    }
+  }
+
+  .close-icon {
+
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 2;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    overflow: hidden;
+    transform: scale(0);
+    transition: transform 80ms;
+
+    &:hover {
+      background-color: #E10098;
+
+      &:before {
+        color: #ffffff;
+      }
+    }
+
+    &:before {
+      font-family: 'FontAwesome';
+      display: inline-block;
+      -webkit-font-smoothing: antialiased;
+      text-decoration: none;
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+      top: 2px;
+      left: 2px;
+      content: "\f00d";
+      position: absolute;
+      text-align: center;
+      line-height: 12px;
+      pointer-events: none;
+    }
+  }
+
+  &:hover {
+
+    .close-icon {
+      transform: scale(1);
+      transition-duration: .16s;
+    }
+  }
+
+  .Title {
+    position: relative;
+    text-align: center;
+    border-bottom: 1px solid transparent;
+    text-overflow: clip;
+    -webkit-mask: linear-gradient(to left, rgba(0, 0, 0, 0), #000000 1em) no-repeat;
+    background-color: #d0d0d0;
+    background-clip: content-box;
+    backface-visibility: hidden;
+    transition: background-color 50ms ease-in-out;
+    white-space: nowrap;
+  }
+}
+
+.TabAddButton {
+
+  .add-icon {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    cursor: pointer;
+    z-index: 2;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    overflow: hidden;
+
+    &:before {
+      font-family: 'FontAwesome';
+      display: inline-block;
+      -webkit-font-smoothing: antialiased;
+      text-decoration: none;
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+      top: 2px;
+      left: 2px;
+      content: "\f067";
+      position: absolute;
+      text-align: center;
+      line-height: 12px;
+      pointer-events: none;
+    }
+  }
+}

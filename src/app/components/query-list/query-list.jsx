@@ -1,6 +1,5 @@
 import React from "react"
 import ReactList from "react-list"
-import moment from "moment"
 
 export default (QueryListItem) => {
 
@@ -30,21 +29,12 @@ export default (QueryListItem) => {
 
         filterData({props, query}) {
 
-            let data = props.data.map(item => Object.assign({}, item, {
-                shortname: (item.operationType || "").substring(0, 2),
-                title: item.title || "<Unnamed>",
-                meta: moment(item.createdAt).from(moment()),
-                subMeta: item.duration ? `${item.duration}ms` : null
-            }))
-
             const filterFn = item => {
-                return item.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
+                return item.get('title').toLowerCase().indexOf(query.toLowerCase()) !== -1
             }
 
-            data = data.filter(item => filterFn(item))
-
             this.setState({
-                data
+                data: props.data.filter(item => filterFn(item))
             })
         }
 
@@ -61,7 +51,7 @@ export default (QueryListItem) => {
                     <div className="QueryListContent">
                         <ReactList
                             type="uniform"
-                            length={this.state.data.length}
+                            length={this.state.data.size}
                             itemRenderer={this.handleItemRender}
                         />
                     </div>
@@ -81,18 +71,18 @@ export default (QueryListItem) => {
 
         handleItemRender = (index, key) => {
 
-            const item = this.state.data[index]
+            const item = this.state.data.get(index)
 
             return (
                 <QueryListItem
                     key={key}
-                    id={item._id}
-                    active={this.props.activeId === item._id}
-                    shortname={item.shortname}
-                    title={item.title}
-                    meta={item.meta}
-                    subTitle={item.subTitle}
-                    subMeta={item.subMeta}
+                    id={item.get('id')}
+                    active={this.props.activeId === item.get('id')}
+                    shortname={item.get('shortname')}
+                    title={item.get('title')}
+                    meta={item.get('meta')}
+                    subTitle={item.get('subTitle')}
+                    subMeta={item.get('subMeta')}
                     onClick={this.handleClick}
                     onRemove={this.handleRemove}
                 />

@@ -6,9 +6,11 @@ var options = {
     // devtool: 'eval-source-map',
     entry: {
         vendor: [
+            'babel-polyfill',
             'react',
             'react-dom',
-            'react-router'
+            'react-router',
+            'sweetalert/dist/sweetalert.css'
         ],
         app: [
             './src/index.jsx'
@@ -38,9 +40,22 @@ var options = {
                         require.resolve('babel-preset-react')
                     ],
                     plugins: [
-                        require.resolve('babel-plugin-transform-class-properties')
+                        require.resolve('babel-plugin-transform-class-properties'),
+                        require.resolve('babel-plugin-syntax-async-functions'),
+                        require.resolve('babel-plugin-transform-regenerator'),
+                        require.resolve('babel-plugin-transform-object-rest-spread')
                     ]
                 }
+            },
+            {
+                test: /\.css$/,
+                loader: "style-loader!css-loader"
+            },
+            {
+                test: /\.png$/, loader: "url-loader?limit=100000"
+            },
+            {
+                test: /\.jpg$/, loader: "file-loader"
             }
         ]
     },
@@ -63,4 +78,4 @@ var options = {
 
 options.target = webpackTargetElectronRenderer(options)
 
-module.exports = options 
+module.exports = options

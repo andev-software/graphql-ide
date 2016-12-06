@@ -1,7 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
-export default (RootView, db) => {
+export default (RootView) => {
 
     function renderApplicationRoot() {
         return new Promise((resolve) => {

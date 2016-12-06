@@ -1,59 +1,59 @@
-.graphiql-container .doc-explorer {
-  background: #f0f0f0;
+.DocumentationPanel .doc-explorer {
+  background: #f7f7f7;
 }
 
-.graphiql-container .doc-explorer-title-bar {
+.DocumentationPanel .doc-explorer-title-bar {
   cursor: default;
   display: -webkit-flex;
   display: flex;
-  height: 34px;
+  height: 46px;
   line-height: 14px;
-  padding: 8px 8px 5px;
+  padding: 3px 3px 5px;
   position: relative;
   -webkit-user-select: none;
   user-select: none;
 }
 
-.graphiql-container .doc-explorer-title {
-  padding: 10px 0 10px 10px;
-  font-weight: bold;
+.DocumentationPanel .doc-explorer-title {
+  padding: 13px 0;
+  font-weight: 200;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow-x: hidden;
   -webkit-flex: 1;
   flex: 1;
-  height: 34px;
+  height: 40px;
 }
 
-.graphiql-container .doc-explorer-back {
+.DocumentationPanel .doc-explorer-back {
   color: #222222;
   cursor: pointer;
   margin: -7px 0 -6px -8px;
   overflow: hidden;
-  padding: 17px 12px 16px 16px;
+  padding: 21px 12px 21px 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.graphiql-container .doc-explorer-back:before {
+.DocumentationPanel .doc-explorer-back:before {
   border-left: 2px solid #222222;
   border-top: 2px solid #222222;
   content: '';
   display: inline-block;
   height: 9px;
-  margin: 0 3px -1px 0;
+  margin: 0 3px 0 0;
   position: relative;
   width: 9px;
   -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
 
-.graphiql-container .doc-explorer-rhs {
+.DocumentationPanel .doc-explorer-rhs {
   position: relative;
 }
 
-.graphiql-container .doc-explorer-contents {
+.DocumentationPanel .doc-explorer-contents {
   background-color: #ffffff;
   border-top: 1px solid $border-color;
   bottom: 0;
@@ -63,32 +63,32 @@
   padding: 20px 15px;
   position: absolute;
   right: 0;
-  top: 47px;
+  top: 46px;
 }
 
-.graphiql-container .doc-type-description p:first-child ,
-.graphiql-container .doc-type-description blockquote:first-child {
+.DocumentationPanel .doc-type-description p:first-child ,
+.DocumentationPanel .doc-type-description blockquote:first-child {
   margin-top: 0;
 }
 
-.graphiql-container .doc-explorer-contents a {
+.DocumentationPanel .doc-explorer-contents a {
   cursor: pointer;
   text-decoration: none;
 }
 
-.graphiql-container .doc-explorer-contents a:hover {
+.DocumentationPanel .doc-explorer-contents a:hover {
   text-decoration: underline;
 }
 
-.graphiql-container .doc-value-description {
+.DocumentationPanel .doc-value-description {
   padding: 4px 0 8px 12px;
 }
 
-.graphiql-container .doc-category {
+.DocumentationPanel .doc-category {
   margin: 20px 0;
 }
 
-.graphiql-container .doc-category-title {
+.DocumentationPanel .doc-category-title {
   border-bottom: 1px solid #e0e0e0;
   color: #777;
   cursor: default;
@@ -102,46 +102,46 @@
   user-select: none;
 }
 
-.graphiql-container .doc-category-item {
+.DocumentationPanel .doc-category-item {
   margin: 12px 0;
   color: #555;
 }
 
-.graphiql-container .keyword {
+.DocumentationPanel .keyword {
   color: #B11A04;
 }
 
-.graphiql-container .type-name {
+.DocumentationPanel .type-name {
   color: #CA9800;
 }
 
-.graphiql-container .field-name {
+.DocumentationPanel .field-name {
   color: #1F61A0;
 }
 
-.graphiql-container .value-name {
+.DocumentationPanel .value-name {
   color: #0B7FC7;
 }
 
-.graphiql-container .arg-name {
+.DocumentationPanel .arg-name {
   color: #8B2BB9;
 }
 
-.graphiql-container .arg:after {
+.DocumentationPanel .arg:after {
   content: ', ';
 }
 
-.graphiql-container .arg:last-child:after {
+.DocumentationPanel .arg:last-child:after {
   content: '';
 }
 
-.graphiql-container .doc-alert-text {
+.DocumentationPanel .doc-alert-text {
   color: #F00F00;
   font-family: 'Consolas', 'Inconsolata', 'Droid Sans Mono', 'Monaco', monospace;
   font-size: 13px;
 }
 
-.graphiql-container .search-box-outer {
+.DocumentationPanel .search-box-outer {
   border: 1px solid #d3d6db;
   box-sizing: border-box;
   display: inline-block;
@@ -153,7 +153,7 @@
   width: 100%;
 }
 
-.graphiql-container .search-box-input {
+.DocumentationPanel .search-box-input {
   border: 0;
   font-size: 12px;
   margin: 0;

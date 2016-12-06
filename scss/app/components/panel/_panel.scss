@@ -1,0 +1,44 @@
+.Panel {
+}
+
+.PanelHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #f7f7f7;
+  height: 47px;
+  border-bottom: 1px solid $border-color;
+  padding: 14px 15px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 200;
+}
+
+.PanelBody {
+  position: absolute;
+  top: 47px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  padding: 20px 15px;
+
+  &.PanelBody--has-footer {
+    bottom: 47px;
+  }
+}
+
+.PanelFooter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f7f7f7;
+  height: 47px;
+  border-top: 1px solid $border-color;
+  padding: 8px 15px;
+  text-align: right;
+}

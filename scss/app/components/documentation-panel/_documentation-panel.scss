@@ -1,0 +1,25 @@
+.DocumentationPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-left: 1px solid $border-color;
+}
+
+.DocumentationPanel__Empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  background-color: #fafafa;
+  padding: 0 50px;
+}
+
+.DocumentationPanel__EmptyMessage {
+  display: flex;
+  color: #888;
+  text-align: center;
+}

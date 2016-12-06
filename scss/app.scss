@@ -6,9 +6,14 @@
 @import "app/components/project-list/project-list-item";
 @import "app/components/query-list/query-list";
 @import "app/components/workspace/workspace-header";
-@import "app/components/header-editor/header-editor";
-@import "app/components/variable-editor/variable-editor";
-@import "app/components/endpoints-editor/endpoints-editor";
+@import "app/components/panel/panel";
+@import "app/components/project-panel/project-panel";
+@import "app/components/environment-panel/environment-panel";
+@import "app/components/map-editor/map-editor";
 @import "app/components/menu/menu";
+@import "app/components/query-panel/query-panel";
+@import "app/components/documentation-panel/documentation-panel";
+@import "app/components/tabs/tabs";
 @import "app/components/graphiql/graphiql";
 @import "app/utils/truncate-text";
+

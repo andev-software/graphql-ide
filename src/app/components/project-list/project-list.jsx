@@ -1,36 +1,19 @@
 import React from "react"
-import createModal from "app/utils/create-modal"
 import electron from "electron"
-import {Map, List} from "immutable"
 import moment from "moment"
+import {connect} from "react-redux"
+import {bindActionCreators} from "redux"
+import {List} from "immutable"
 
-export default (mutations, queries, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem, ProjectFormModal) => {
+export default ({vex, actionCreators, selectors, factories, importExport, history, Layout, WorkspaceHeader, MenuItem, ProjectListItem}) => {
 
-    ProjectFormModal = createModal(ProjectFormModal)
+    const mapStateToProps = (state, props) => ({
+        projects: selectors.allProjects(state)
+    })
 
-    return class ProjectList extends React.Component {
+    const mapDispatchToProps = dispatch => bindActionCreators(actionCreators, dispatch)
 
-        state = {
-            projects: []
-        }
-
-        ctrls = {
-            projectFormModal: null
-        }
-
-        componentDidMount() {
-            this.fetchProjects()
-        }
-
-        fetchProjects() {
-
-            queries.allProjects().then(projects => {
-
-                this.setState({
-                    projects
-                })
-            })
-        }
+    class ProjectList extends React.Component {
 
         render() {
 
@@ -51,14 +34,6 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                             onClick={item.onClick}
                         />
                     ))}
-                </div>
-            )
-
-            const headerCenter = (
-                <div className="Title">
-                    <span>
-                        Graph<em>i</em>QL App
-                    </span>
                 </div>
             )
 
@@ -96,7 +71,6 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                                 width={width}
                                 height={HEADER_HEIGHT}
                                 left={headerLeft}
-                                center={headerCenter}
                                 right={headerRight}
                             />
                             <div
@@ -124,31 +98,25 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                                                 onClick={this.handleNewClick}
                                             />
                                         </div>
-                                        {this.state.projects.map(project => (
-                                            <div key={project._id} className="col-sm-6 col-md-4">
+                                        {this.props.projects.map(project => (
+                                            <div key={project.get('id')} className="col-sm-6 col-md-4">
                                                 <ProjectListItem
-                                                    id={project._id}
+                                                    id={project.get('id')}
                                                     backgroundColor="#E10098"
                                                     color="#fff"
-                                                    shortname={(project.title || "").substring(0, 2)}
-                                                    title={project.title}
-                                                    description={project.description}
-                                                    meta={moment(project.updatedAt).format('DD/MM/YYYY HH:mm')}
+                                                    shortname={(project.get('title') || "").substring(0, 2)}
+                                                    title={project.get('title')}
+                                                    description={project.get('description')}
+                                                    meta={moment(project.get('updatedAt')).format('DD/MM/YYYY HH:mm')}
                                                     onClick={this.handleClick}
                                                     onRemove={this.handleRemove}
                                                     onExport={this.handleProjectExport}
                                                     onVersionOneExport={this.handleVersionOneProjectExport}
                                                 />
                                             </div>
-                                        ))}
+                                        )).toArray()}
                                     </div>
                                 </div>
-                            </div>
-                            <div className="overlay">
-                                <ProjectFormModal
-                                    ref={ref => this.ctrls.projectFormModal = ref}
-                                    title="Create Project"
-                                />
                             </div>
                         </div>
                     )}
@@ -158,7 +126,7 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
 
         handleProjectImport = () => {
 
-            importExport.importProject().then(() => this.fetchProjects())
+            importExport.importProject()
         }
 
         handleProjectExport = ({id}) => {
@@ -178,31 +146,59 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
 
         handleRemove = ({id}) => {
 
-            mutations.removeProject({
-                projectId: id
-            }).then(() => this.fetchProjects())
+            this.props.projectsRemove({
+                id
+            })
         }
 
         handleNewClick = () => {
 
-            this.ctrls.projectFormModal.open({
-                project: Map({
-                    title: '',
-                    description: '',
-                    endpoints: List()
+
+            swal({
+                title: 'Add project',
+                text: "Choose a name for the project",
+                type: 'input',
+                showCancelButton: true,
+                closeOnConfirm: true,
+                animation: false
+            }, (value) => {
+
+                if (value === false) {
+                    return
+                }
+
+                if (!value || !value.length) {
+
+                    swal({
+                        title: "Error",
+                        text: "You might want to fill in a name!",
+                        type: "error",
+                        animation: false
+                    })
+                    return
+                }
+
+                const project = factories.createProject()
+                const environment = factories.createEnvironment()
+
+                this.props.environmentsCreate({
+                    id: environment.get('id'),
+                    data: environment
+                })
+
+                this.props.projectsCreate({
+                    id: project.get('id'),
+                    data: project.merge({
+                        title: value,
+                        activeEnvironmentId: environment.get('id'),
+                        environmentIds: List([
+                            environment.get('id')
+                        ])
+                    })
                 })
             })
-                .then(result => {
-
-                    if (result.status === 'SAVE') {
-
-                        mutations.createProject({
-                            input: result.payload.input.toJSON()
-                        }).then(() => {
-                            this.fetchProjects()
-                        })
-                    }
-                })
         }
     }
+
+    return connect(mapStateToProps, mapDispatchToProps, null, {withRef: true})(ProjectList)
 }
