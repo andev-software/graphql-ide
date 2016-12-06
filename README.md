@@ -59,3 +59,9 @@ Manage projects
 ![Manage projects](assets/screenshot-4.png)
 
 [0]: https://github.com/redound/graphql-ide/releases
+
+## Upgrade from 0.x
+
+Download the latest 0.2.x version, this will give you an option to export any project for 1.x.
+After you've installed 1.x you can import the project there. You can always go back to 0.x, your project data is stored at
+`/Users/[username]/Library/Application Support/graphql-ide`
