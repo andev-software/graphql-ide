@@ -3,6 +3,8 @@ import fs from "fs"
 import electron from "electron"
 const {remote} = electron
 import getDefined from "app/utils/get-defined"
+import uuid from "uuid"
+import {Map, List} from "immutable"
 
 export default (mutations, queries) => {
 
@@ -181,7 +183,79 @@ export default (mutations, queries) => {
             })
     }
 
+    function exportVersionOneProject({projectId}) {
+
+
+        let output = {
+            version: "0.2",
+
+        }
+
+        function processProject(projectId) {
+            return queries.findProject({projectId}).then((project) => {
+                output.project = project
+            })
+        }
+
+        function processQueries(projectId) {
+            return queries.findProjectQueries({
+                projectId,
+                type: 'COLLECTION'
+            }).then(queries => {
+                output.project.queries = queries
+            })
+        }
+
+        function promptSaveDialog() {
+
+            const filename = 'graphiql_project_' + moment().format('DD-MM-YYYY_HH-mm') + '.json'
+            const downloadsPath = remote.app.getPath('downloads')
+
+            return new Promise((resolve, reject) => {
+
+                remote.dialog.showSaveDialog({
+                    defaultPath: downloadsPath + '/' + filename,
+                    filters: [{
+                        name: 'JSON',
+                        extensions: ['json']
+                    }]
+                }, (result) => {
+                    resolve(result)
+                })
+            })
+        }
+
+        function saveFile(filePath) {
+
+            return new Promise((resolve, reject) => {
+
+                const data = JSON.stringify(output, null, 4)
+
+                fs.writeFile(filePath, data, (err, result) => {
+
+                    if (err) {
+                        reject(err)
+                        return
+                    }
+
+                    resolve(result)
+                })
+            })
+        }
+
+        return processProject(projectId)
+            .then(() => processQueries(projectId))
+            .then(promptSaveDialog)
+            .then(filePath => {
+
+                if (filePath) {
+                    return saveFile(filePath)
+                }
+            })
+    }
+
     return {
+        exportVersionOneProject,
         exportProject,
         importProject
     }

@@ -137,6 +137,7 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
                                                     onClick={this.handleClick}
                                                     onRemove={this.handleRemove}
                                                     onExport={this.handleProjectExport}
+                                                    onVersionOneExport={this.handleVersionOneProjectExport}
                                                 />
                                             </div>
                                         ))}
@@ -163,6 +164,11 @@ export default (mutations, queries, importExport, history, Layout, WorkspaceHead
         handleProjectExport = ({id}) => {
 
             importExport.exportProject({projectId: id})
+        }
+
+        handleVersionOneProjectExport = ({id}) => {
+
+            importExport.exportVersionOneProject({projectId: id})
         }
 
         handleClick = ({id}) => {
