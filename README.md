@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="GraphQL IDE" src="assets/logo.png" width="440">
+    <img alt="GraphQL IDE" src="assets/logo.svg" width="440">
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
 - Store queries
 - Query history
 - Custom headers
-- Project variables for dynamic headers
+- Environment variables for dynamic headers
 
 ## Installing
 
@@ -38,16 +38,33 @@ Please file issues under GitHub, or submit a pull request if you'd like to direc
 
 ## Screenshots
 
-Execute queries
+
+<p align="center">
+  <h3>
+    Execute queries
+  </h3>
+</p>
 ![Execute queries](assets/screenshot-1.png)
 
-Custom headers
+<p align="center">
+  <h3>
+    Custom headers
+  </h3>
+</p>
 ![Custom headers](assets/screenshot-2.png)
 
-Project variables for dynamic headers
+<p align="center">
+  <h3>
+    Environment variables for dynamic headers
+  </h3>
+</p>
 ![Custom headers](assets/screenshot-3.png)
 
-Manage projects
+<p align="center">
+  <h3>
+    Manage projects
+  </h3>
+</p>
 ![Manage projects](assets/screenshot-4.png)
 
 [0]: https://github.com/redound/graphql-ide/releases
