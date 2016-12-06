@@ -1,4 +1,5 @@
 import React from "react"
+import cn from "classnames"
 
 export default () => {
 
@@ -7,7 +8,12 @@ export default () => {
         render() {
 
             return (
-                <div className="PanelBody">
+                <div
+                    className={cn("PanelBody", {
+                        "PanelBody--has-footer": this.props.hasFooter
+                    })
+                    }
+                >
                     {this.props.children}
                 </div>
             )

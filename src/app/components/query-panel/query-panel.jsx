@@ -76,7 +76,7 @@ export default ({actionCreators, selectors, MapEditor, Panel, PanelHeader, Panel
                     <PanelHeader>
                         Query
                     </PanelHeader>
-                    <PanelBody>
+                    <PanelBody hasFooter={true}>
                         <FormGroup
                             controlId="title"
                         >
