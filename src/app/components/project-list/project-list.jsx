@@ -111,6 +111,7 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
                                                     onClick={this.handleClick}
                                                     onRemove={this.handleRemove}
                                                     onExport={this.handleProjectExport}
+                                                    onVersionOneExport={this.handleVersionOneProjectExport}
                                                 />
                                             </div>
                                         )).toArray()}
@@ -131,6 +132,11 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
         handleProjectExport = ({id}) => {
 
             importExport.exportProject({projectId: id})
+        }
+
+        handleVersionOneProjectExport = ({id}) => {
+
+            importExport.exportVersionOneProject({projectId: id})
         }
 
         handleClick = ({id}) => {

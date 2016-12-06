@@ -20,6 +20,10 @@ export default () => {
                     click: this.handleExport
                 }),
                 new MenuItem({
+                    label: 'Export Project (version 1.0)',
+                    click: this.handleVersionOneExport
+                }),
+                new MenuItem({
                     type: 'separator',
                 }),
                 new MenuItem({
@@ -81,6 +85,13 @@ export default () => {
             if (this.props.onRemove) {
                 this.state.menu.popup(remote.getCurrentWindow())
             }
+        }
+
+        handleVersionOneExport = e => {
+            this.props.onVersionOneExport({
+                id: this.props.id,
+                e
+            })
         }
 
         handleExport = e => {
