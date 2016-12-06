@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="GraphQL IDE" src="assets/logo.svg" width="440">
+    <img alt="GraphQL IDE" src="https://rawgit.com/redound/graphql-ide/master/assets/logo.svg" width="440">
 </p>
 
 <p align="center">
@@ -38,33 +38,24 @@ Please file issues under GitHub, or submit a pull request if you'd like to direc
 
 ## Screenshots
 
-
-<p align="center">
-  <h3>
-    Execute queries
-  </h3>
-</p>
+<h3 align="center">
+Execute queries
+</h3>
 ![Execute queries](assets/screenshot-1.png)
 
-<p align="center">
-  <h3>
-    Custom headers
-  </h3>
-</p>
+<h3 align="center">
+Custom headers
+</h3>
 ![Custom headers](assets/screenshot-2.png)
 
-<p align="center">
-  <h3>
-    Environment variables for dynamic headers
-  </h3>
-</p>
+<h3 align="center">
+Environment variables for dynamic headers
+</h3>
 ![Custom headers](assets/screenshot-3.png)
 
-<p align="center">
-  <h3>
-    Manage projects
-  </h3>
-</p>
+<h3 align="center">
+Manage projects
+</h3>
 ![Manage projects](assets/screenshot-4.png)
 
 [0]: https://github.com/redound/graphql-ide/releases
