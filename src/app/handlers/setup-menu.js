@@ -40,7 +40,7 @@ export default (store) => {
                     label: 'Quit',
                     accelerator: 'Command+Q',
                     click: function () {
-                        app.quit()
+                        electron.remote.app.quit()
                     }
                 }]
             }, {
@@ -53,7 +53,7 @@ export default (store) => {
                     label: 'Close Tab',
                     accelerator: 'Command+W',
                     click: get(delegate, 'file.closeTab.click')
-                },  {
+                }, {
                     type: 'separator'
                 }, {
                     label: get(delegate, 'file.clearHistoryQueries.description'),

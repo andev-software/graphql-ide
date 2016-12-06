@@ -1,6 +1,9 @@
 import {List, Map} from "immutable"
 import camelCase from "camel-case"
 import set from "lodash/set"
+import toUpper from "lodash/toUpper"
+import snakeCase from "snake-case"
+
 
 export default class DataStore {
 
@@ -28,8 +31,10 @@ export default class DataStore {
 
         return this.collections.reduce((result, collection) => {
 
+            const prefix = toUpper(snakeCase(collection.name))
+
             collection.actions.forEach((handler, action) => {
-                result = result.set(action, handler)
+                result = result.set(prefix + '_' + action, handler)
             })
 
             return result
@@ -40,9 +45,11 @@ export default class DataStore {
 
         return this.collections.reduce((result, collection) => {
 
+            const prefix = toUpper(snakeCase(collection.name))
+
             collection.actions.forEach((handler, action) => {
                 set(result, [collection.name, camelCase(action)], payload => ({
-                    type: action,
+                    type: prefix + '_' + action,
                     payload
                 }))
             })

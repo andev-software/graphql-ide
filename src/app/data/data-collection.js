@@ -1,6 +1,4 @@
 import {List, Map, fromJS} from "immutable"
-import toUpper from "lodash/toUpper"
-import snakeCase from "snake-case"
 
 function hydrateReducer(type) {
 
@@ -101,19 +99,15 @@ export default class DataCollection {
         return this
     }
 
-    getPrefix() {
-        return toUpper(snakeCase(this.name))
-    }
-
     createAction() {
-        return this.action(this.getPrefix() + '_' + 'CREATE', createReducer(this.name))
+        return this.action('CREATE', createReducer(this.name))
     }
 
     updateAction() {
-        return this.action(this.getPrefix() + '_' + 'UPDATE', updateReducer(this.name))
+        return this.action('UPDATE', updateReducer(this.name))
     }
 
     removeAction() {
-        return this.action(this.getPrefix() + '_' + 'REMOVE', removeReducer(this.name))
+        return this.action('REMOVE', removeReducer(this.name))
     }
 }
