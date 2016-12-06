@@ -51,6 +51,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             width: 0,
             height: 0,
             schemaCache: Map(),
+            variableToTypeCache: Map(),
             menu: null
         }
 
@@ -265,6 +266,14 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
             const activeTab = this.props.project.get('activeTab')
 
+            let variableToType = this.state.variableToTypeCache.get(activeTab.getIn(['query', 'id']))
+
+            if (!variableToType) {
+                const queryFacts = getQueryFacts(this.getSchema(), activeTab.getIn(['query', 'query']))
+                variableToType = queryFacts && queryFacts.variableToType
+                this.state.variableToTypeCache.set(activeTab.getIn(['query', 'id']), variableToType)
+            }
+
             const schema = this.getSchema()
 
             const {height, width} = this.state
@@ -344,11 +353,16 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                 {activeTab ? (
                                     <GraphiQL
                                         ref={ref => this.graphiql = ref}
+                                        variableEditorOpen={this.props.project.get('bottomPanel') === 'QUERY_VARIABLES'}
+                                        variableEditorHeight={this.props.project.get('bottomPanelHeight')}
                                         schema={schema}
                                         onEditQuery={this.handleEditQuery}
                                         onEditVariables={this.handleEditVariables}
                                         onEditOperationName={this.handleEditOperationName}
                                         onRunQuery={this.handleEditorRunQuery}
+                                        onOpenDocumentationWithType={this.handleOpenDocumentationWithType}
+                                        onVariableEditorSettingsChange={this.handleVariableEditorSettingsChange}
+                                        variableToType={variableToType}
                                         query={activeTab.getIn(['query', 'query']) || ''}
                                         operationName={activeTab.getIn(['query', 'operationName']) || ''}
                                         response={activeTab.getIn(['historyQuery', 'response']) || ''}
@@ -478,17 +492,28 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             this.runQuery()
         }
 
+        handleOpenDocumentationWithType = (type) => {
+            this.docExplorerComponent.showDoc(type)
+        }
+
+        handleVariableEditorSettingsChange = ({open, height}) => {
+            this.props.projectsUpdate({
+                id: this.props.project.get('id'),
+                data: {
+                    bottomPanel: open ? 'QUERY_VARIABLES' : null,
+                    bottomPanelHeight: height
+                }
+            })
+        }
+
         runQuery = async() => {
 
             const activeEnvironment = this.props.project.get('activeEnvironment')
             const activeTab = this.props.project.get('activeTab')
             let query = activeTab.get('query')
 
-            console.log('query', query)
-            console.log('query', query.toJSON())
-
             if (!activeEnvironment.get('schemaResponse')) {
-                swal("Hey Ya!", "No schema available. Check the environment settings", "error")
+                swal("Error", "No schema available. Check the environment settings", "error")
                 return
             }
 
@@ -701,11 +726,15 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
             const queryFacts = getQueryFacts(this.getSchema(), query.get('query'))
 
+            this.setState({
+                variableToTypeCache: this.state.variableToTypeCache.set(query.get('id'), queryFacts && queryFacts.variableToType)
+            })
+
             this.props.queriesUpdate({
                 id: query.get('id'),
                 data: {
                     operationName: getOperationName(queryFacts),
-                    operationType: getOperationType(queryFacts),
+                    operationType: getOperationType(queryFacts)
                 }
             })
 
@@ -808,7 +837,6 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
             this.props.project.get('tabs').forEach(tab => {
 
                 if (tab.get('historyQueryId') === id || tab.get('collectionQueryId') === id) {
-                    console.log('remove tab with id', id)
                     this.props.projectsDetachTab({
                         projectId: this.props.project.get('id'),
                         tabId: tab.get('id')

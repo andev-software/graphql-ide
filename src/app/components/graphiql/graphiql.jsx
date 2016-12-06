@@ -8,6 +8,8 @@ import {
     print,
 } from 'graphql';
 
+import {getLeft, getTop} from 'graphiql/dist/utility/elementPosition';
+
 import {ExecuteButton} from 'graphiql/dist/components/ExecuteButton';
 import {QueryEditor} from 'graphiql/dist/components/QueryEditor';
 import {VariableEditor} from 'graphiql/dist/components/VariableEditor';
@@ -62,6 +64,11 @@ export default () => {
 
         render() {
 
+            const variableOpen = this.props.variableEditorOpen
+            const variableStyle = {
+                height: variableOpen ? this.props.variableEditorHeight : null
+            }
+
             return (
                 <div className="graphiql-container">
                     <div className="editorWrap">
@@ -80,8 +87,26 @@ export default () => {
                                     value={this.props.query}
                                     onEdit={this.handleEditQuery}
                                     onHintInformationRender={this.handleHintInformationRender}
-                                    onRunQuery={this.handleEditorRunQuery}
+                                    onRunQuery={() => null}
                                 />
+                                <div className="variable-editor" style={variableStyle}>
+                                    <div
+                                        className="variable-editor-title"
+                                        style={{cursor: variableOpen ? 'row-resize' : 'n-resize'}}
+                                        onMouseDown={this.handleVariableResizeStart}>
+                                        {'Query Variables'}
+                                    </div>
+                                    <VariableEditor
+                                        ref={n => {
+                                            this.variableEditorComponent = n;
+                                        }}
+                                        value={this.props.variables}
+                                        variableToType={this.props.variableToType}
+                                        onEdit={this.handleEditVariables}
+                                        onHintInformationRender={this.handleHintInformationRender}
+                                        onRunQuery={() => null}
+                                    />
+                                </div>
                             </div>
                             <div className="resultWrap">
                                 {
@@ -100,12 +125,90 @@ export default () => {
                         </div>
                     </div>
                 </div>
-            );
+            )
+        }
+
+        handleEditVariables = value => {
+            if (this.props.onEditVariables) {
+                this.props.onEditVariables(value);
+            }
+        }
+
+        handleHintInformationRender = elem => {
+            elem.addEventListener('click', this._onClickHintInformation);
+
+            let onRemoveFn;
+            elem.addEventListener('DOMNodeRemoved', onRemoveFn = () => {
+                elem.removeEventListener('DOMNodeRemoved', onRemoveFn);
+                elem.removeEventListener('click', this._onClickHintInformation);
+            });
         }
 
         handleEditQuery = (value) => {
             if (this.props.onEditQuery) {
                 this.props.onEditQuery(value)
+            }
+        }
+
+        handleVariableResizeStart = downEvent => {
+            downEvent.preventDefault();
+
+            let didMove = false;
+            const wasOpen = this.props.variableEditorOpen;
+            const hadHeight = this.props.variableEditorHeight;
+            const offset = downEvent.clientY - getTop(downEvent.target);
+
+            let onMouseMove = moveEvent => {
+                if (moveEvent.buttons === 0) {
+                    return onMouseUp();
+                }
+
+                didMove = true;
+
+                const editorBar = ReactDOM.findDOMNode(this.editorBarComponent);
+                const topSize = moveEvent.clientY - getTop(editorBar) - offset;
+                const bottomSize = editorBar.clientHeight - topSize;
+                if (bottomSize < 60) {
+                    this.props.onVariableEditorSettingsChange({
+                        open: false,
+                        height: hadHeight
+                    })
+                } else {
+                    this.props.onVariableEditorSettingsChange({
+                        open: true,
+                        height: bottomSize
+                    });
+                }
+            };
+
+            let onMouseUp = () => {
+                if (!didMove) {
+                    this.props.onVariableEditorSettingsChange({
+                        open: !wasOpen,
+                        height: this.props.variableEditorHeight
+                    });
+                }
+
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                onMouseMove = null;
+                onMouseUp = null;
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        _onClickHintInformation = event => {
+            if (event.target.className === 'typeName') {
+                const typeName = event.target.innerHTML;
+                const schema = this.props.schema;
+                if (schema) {
+                    const type = schema.getType(typeName);
+                    if (type) {
+                        this.props.onOpenDocumentationWithType(type)
+                    }
+                }
             }
         }
     }

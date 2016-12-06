@@ -164,7 +164,7 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
                 if (!value || !value.length) {
 
                     swal({
-                        title: "Hey Ya!",
+                        title: "Error",
                         text: "You might want to fill in a name!",
                         type: "error",
                         animation: false

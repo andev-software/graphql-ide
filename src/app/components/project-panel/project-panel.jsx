@@ -322,7 +322,7 @@ export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHe
                 if (!value || !value.length) {
 
                     swal({
-                        title: "Hey Ya!",
+                        title: "Error",
                         text: "You might want to fill in a name!",
                         type: "error",
                         animation: false
