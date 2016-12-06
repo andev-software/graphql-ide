@@ -223,7 +223,9 @@ export default (mutations, queries) => {
             data = data.setIn(['dataStore', 'environments'], environmentIds)
 
             data = data.updateIn(['dataStore', 'projectsById', projectUUID], project => {
-                return project.set('environmentIds', environmentIds)
+                return project
+                    .set('activeEnvironmentId', environmentIds[0])
+                    .set('environmentIds', environmentIds)
             })
         }
 
