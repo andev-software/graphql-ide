@@ -33,7 +33,8 @@ export default di => {
         name: 'app/services/store',
         dependencies: [
             'app/reducers/root',
-            'app/services/dataStore'
+            'app/services/dataStore',
+            'app/services/actualizeState'
         ],
         factory: require('app/services/store').default
     })
@@ -113,13 +114,10 @@ export default di => {
     })
 
     di.register({
-        name: 'app/services/mutations',
-        dependencies: [
-            'app/services/database'
-        ],
-        factory: require('app/services/mutations').default
+        name: 'app/services/actualizeState',
+        dependencies: [],
+        factory: require('app/services/actualize-state').default
     })
-
 
     di.register({
         name: 'app/services/importExport',

@@ -6,23 +6,34 @@ import createLogger from "redux-logger"
 import isEmpty from "lodash/isEmpty"
 import fs from "fs"
 
-export default (rootReducer, dataStore) => {
+export default (rootReducer, dataStore, actualizeState) => {
 
     const dataPath = electron.remote.app.getPath('userData')
     const filePath = dataPath + '/state.json'
 
-    let initialState = Map()
+    function writeState(state) {
+        fs.writeFileSync(filePath, JSON.stringify(state, null, 4), 'utf-8')
+    }
+
+    let state = Map()
 
     if (fs.existsSync(filePath)) {
-        let state = fs.readFileSync(filePath, 'utf-8')
+        let storedState = fs.readFileSync(filePath, 'utf-8')
 
-        if (!isEmpty(state)) {
-            state = JSON.parse(state)
+        if (!isEmpty(storedState)) {
+            storedState = JSON.parse(storedState)
         }
 
-        if (state) {
-            initialState = fromJS(state)
+        if (storedState) {
+            state = fromJS(storedState)
         }
+    }
+
+
+    const initialState = actualizeState(state)
+
+    if (initialState !== state) {
+        writeState(initialState)
     }
 
     const logger = createLogger()
@@ -35,7 +46,7 @@ export default (rootReducer, dataStore) => {
 
     store.subscribe(() => {
         const state = store.getState().toJSON()
-        fs.writeFileSync(filePath, JSON.stringify(state, null, 4), 'utf-8')
+        writeState(state)
     })
 
     return store

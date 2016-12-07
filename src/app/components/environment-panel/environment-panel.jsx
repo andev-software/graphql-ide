@@ -7,10 +7,12 @@ import electron from "electron"
 const {remote} = electron
 import fs from "fs"
 import {buildClientSchema} from 'graphql'
+import applyVariablesToHeaders from "app/utils/apply-variables-to-headers"
 
 export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHeader, PanelBody}) => {
 
     const mapStateToProps = (state, props) => ({
+        project: selectors.findProject(state, {id: props.projectId}),
         environment: selectors.findEnvironment(state, {id: props.environmentId})
     })
 
@@ -110,6 +112,14 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                                 onChange={this.handleVariablesChange}
                             />
                         </FormGroup>
+                        <FormGroup>
+                            <ControlLabel>Headers</ControlLabel>
+                            <MapEditor
+                                value={this.props.environment.get('headers')}
+                                noContentMessage="No headers (yet)"
+                                onChange={this.handleHeadersChange}
+                            />
+                        </FormGroup>
                     </PanelBody>
                 </Panel>
             )
@@ -121,6 +131,16 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
                 id: this.props.environment.get('id'),
                 data: {
                     variables: value
+                }
+            })
+        }
+
+        handleHeadersChange = ({value}) => {
+
+            this.props.environmentsUpdate({
+                id: this.props.environment.get('id'),
+                data: {
+                    headers: value
                 }
             })
         }
@@ -159,9 +179,19 @@ export default ({actionCreators, selectors, queries, MapEditor, Panel, PanelHead
 
         refreshSchema = (url) => {
 
+            const environmentVariables = this.props.environment.get('variables')
+            const environmentHeaders = this.props.environment.get('headers')
+            const projectHeaders = this.props.project.get('headers')
+
+            const mergedHeaders = projectHeaders
+                .merge(environmentHeaders)
+
+            const headers = applyVariablesToHeaders(environmentVariables, mergedHeaders)
+
             queries.fetchSchema({
                 url: url,
-                method: this.props.environment.get('queryMethod')
+                method: this.props.environment.get('queryMethod'),
+                headers: headers
             }).then((response) => {
 
                 const schema = buildClientSchema(response.data)

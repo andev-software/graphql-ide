@@ -12,20 +12,7 @@ import {bindActionCreators} from "redux"
 import swal from "sweetalert"
 import get from "lodash/get"
 import {createSelector} from "reselect"
-
-function applyVariablesToHeaders(variables, headers) {
-
-    return headers.reduce((result, headerValue, headerKey) => {
-
-        variables.forEach((varValue, varKey) => {
-            headerValue = headerValue.replace(`{{${varKey}}}`, varValue)
-        })
-
-        result[headerKey] = headerValue
-
-        return result
-    }, {})
-}
+import applyVariablesToHeaders from "app/utils/apply-variables-to-headers"
 
 export default ({store, actionCreators, selectors, queries, factories, history, setupMenu, WorkspaceHeader, MenuItem, QueryList, Tabs, GraphiQL, ProjectPanel, EnvironmentPanel, QueryPanel}) => {
 
@@ -402,6 +389,7 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
                                     <EnvironmentPanel
                                         width={RIGHT_PANEL_WIDTH}
                                         height={RIGHT_PANEL_HEIGHT}
+                                        projectId={this.props.project.get('id')}
                                         environmentId={this.props.project.get('activeEnvironmentId')}
                                         onClose={this.handleRightPanelClose}
                                     />
@@ -532,8 +520,11 @@ export default ({store, actionCreators, selectors, queries, factories, history, 
 
             const environmentVariables = activeEnvironment.get('variables')
             const projectHeaders = this.props.project.get('headers')
+            const environmentHeaders = activeEnvironment.get('headers')
             const queryHeaders = query.get('headers')
-            const mergedHeaders = projectHeaders.merge(queryHeaders)
+            const mergedHeaders = projectHeaders
+                .merge(environmentHeaders)
+                .merge(queryHeaders)
 
             const headers = applyVariablesToHeaders(environmentVariables, mergedHeaders)
 

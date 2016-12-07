@@ -30,6 +30,7 @@ export default () => {
                 url: '',
                 queryMethod: 'POST',
                 variables: Map({}),
+                headers: Map({}),
                 schemaResponse: null,
                 schemaUpdatedAt: null
             })
