@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.18.2",
-    "babel-loader": "^6.2.7",
+    "babel-loader": "^6.2.10",
     "babel-plugin-syntax-async-functions": "^6.13.0",
     "babel-plugin-syntax-class-properties": "^6.13.0",
     "babel-plugin-transform-class-properties": "^6.19.0",
@@ -67,14 +67,14 @@
     "del": "^2.2.2",
     "electron-packager": "^8.3.0",
     "express": "^4.14.0",
-    "file-loader": "^0.9.0",
+    "file-loader": "^0.10.0",
     "github-latest-release": "^0.1.1",
     "json-loader": "^0.5.4",
     "minimist": "^1.2.0",
     "node-sass": "^3.13.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.3",
+    "webpack": "^2.2.1",
     "webpack-target-electron-renderer": "^0.4.0"
   }
 }

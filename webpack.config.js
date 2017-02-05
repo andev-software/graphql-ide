@@ -12,29 +12,26 @@ var options = {
             'react-router',
             'sweetalert/dist/sweetalert.css'
         ],
-        app: [
-            './src/index.jsx'
-        ]
+        app: './src/index.jsx'
     },
     output: {
         filename: "[name].js",
         path: './dist'
     },
     resolve: {
-        root: path.resolve(__dirname) + '/src',
-        extensions: ['', '.webpack.js', '.web.js', '.js', '.jsx']
+        modules: [
+          path.resolve(__dirname) + '/src',
+          'node_modules'
+        ],
+        extensions: ['.webpack.js', '.web.js', '.js', '.jsx']
     },
     module: {
-        loaders: [
-            {
-                test: /\.json/,
-                loader: require.resolve('json-loader')
-            },
+        rules: [
             {
                 test: /\.jsx?$/,
                 exclude: /node_modules/,
                 loader: require.resolve('babel-loader'),
-                query: {
+                options: {
                     presets: [
                         require.resolve('babel-preset-es2015'),
                         require.resolve('babel-preset-react')
@@ -49,20 +46,28 @@ var options = {
             },
             {
                 test: /\.css$/,
-                loader: "style-loader!css-loader"
+                use: [
+                  "style-loader",
+                  "css-loader"
+                ]
             },
             {
-                test: /\.png$/, loader: "url-loader?limit=100000"
+                test: /\.png$/,
+                loader: "url-loader",
+                options: {
+                  limit: '100000'
+                }
             },
             {
-                test: /\.jpg$/, loader: "file-loader"
+                test: /\.jpg$/,
+                loader: "file-loader"
             }
         ]
     },
     plugins: [
         new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en|nl)$/),
         new webpack.optimize.CommonsChunkPlugin({
-            names: ['vendor'],
+            name: 'vendor',
             filename: "[name].js"
         }),
         new webpack.ProvidePlugin({
