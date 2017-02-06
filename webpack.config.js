@@ -1,6 +1,5 @@
 var path = require('path')
 var webpack = require('webpack')
-var webpackTargetElectronRenderer = require('webpack-target-electron-renderer')
 
 var options = {
     // devtool: 'eval-source-map',
@@ -14,6 +13,7 @@ var options = {
         ],
         app: './src/index.jsx'
     },
+    target: 'electron-renderer',
     output: {
         filename: "[name].js",
         path: './dist'
@@ -80,7 +80,5 @@ var options = {
         })
     ]
 }
-
-options.target = webpackTargetElectronRenderer(options)
 
 module.exports = options
