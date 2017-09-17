@@ -24,6 +24,9 @@ import {
 } from 'graphiql/dist/utility/introspectionQueries';
 import debounce from "lodash/debounce"
 
+let debounceEditQueryTimer
+let debounceEditVariables
+
 export default () => {
 
     return class GraphiQL extends React.Component {
@@ -63,7 +66,6 @@ export default () => {
         }
 
         render() {
-
             const variableOpen = this.props.variableEditorOpen
             const variableStyle = {
                 height: variableOpen ? this.props.variableEditorHeight : null
@@ -130,7 +132,13 @@ export default () => {
 
         handleEditVariables = value => {
             if (this.props.onEditVariables) {
-                this.props.onEditVariables(value);
+                if (debounceEditVariables) {
+                    clearTimeout(debounceEditVariables)
+                    debounceEditVariables = null
+                }
+                debounceEditVariables = setTimeout(() => {
+                    this.props.onEditVariables(value);
+                }, 200)
             }
         }
 
@@ -145,9 +153,13 @@ export default () => {
         }
 
         handleEditQuery = (value) => {
-            if (this.props.onEditQuery) {
-                this.props.onEditQuery(value)
+            if (debounceEditQueryTimer) {
+                clearTimeout(debounceEditQueryTimer)
+                debounceEditQueryTimer = null
             }
+            debounceEditQueryTimer = setTimeout(() => {
+                this.props.onEditQuery(value)
+            }, 200)
         }
 
         handleVariableResizeStart = downEvent => {
