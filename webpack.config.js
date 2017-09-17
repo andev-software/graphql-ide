@@ -16,7 +16,7 @@ var options = {
     target: 'electron-renderer',
     output: {
         filename: "[name].js",
-        path: './dist'
+        path: path.resolve(__dirname, 'dist')
     },
     resolve: {
         modules: [
