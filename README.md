@@ -47,21 +47,25 @@ Please file issues under GitHub, or submit a pull request if you'd like to direc
 <h3 align="center">
 Execute queries
 </h3>
+
 ![Execute queries](assets/screenshot-1.png)
 
 <h3 align="center">
 Custom headers
 </h3>
+
 ![Custom headers](assets/screenshot-2.png)
 
 <h3 align="center">
 Environment variables for dynamic headers
 </h3>
+
 ![Custom headers](assets/screenshot-3.png)
 
 <h3 align="center">
 Manage projects
 </h3>
+
 ![Manage projects](assets/screenshot-4.png)
 
 [0]: https://github.com/redound/graphql-ide/releases
