@@ -28,9 +28,12 @@ Unpack the latest app from the [releases][0] tab
 Releases available soon, for now build the binary using
 
 ````
+npm install -g electron
 npm install
 npm run package --all
 ````
+
+Run the binary using `electron .`
 
 ## Upgrade from 0.x
 
