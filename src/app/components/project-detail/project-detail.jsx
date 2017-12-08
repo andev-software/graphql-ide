@@ -9,7 +9,7 @@ import getOperationType from "app/components/graphiql/utils/get-operation-type"
 import {DocExplorer} from 'graphiql/dist/components/DocExplorer';
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
-import swal from "sweetalert"
+import swal from "sweetalert2"
 import get from "lodash/get"
 import {createSelector} from "reselect"
 import applyVariablesToHeaders from "app/utils/apply-variables-to-headers"
