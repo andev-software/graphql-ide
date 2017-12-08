@@ -157,24 +157,16 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
             swal({
                 title: 'Add project',
                 text: "Choose a name for the project",
-                type: 'input',
+                input: 'text',
+                inputValidator: (value) => {
+                    return !value && 'You might want to fill in a name!'
+                },
                 showCancelButton: true,
-                closeOnConfirm: true,
                 animation: false
-            }, (value) => {
+            }).then((result) => {
+                const projectTitle = result.value
 
-                if (value === false) {
-                    return
-                }
-
-                if (!value || !value.length) {
-
-                    swal({
-                        title: "Error",
-                        text: "You might want to fill in a name!",
-                        type: "error",
-                        animation: false
-                    })
+                if (projectTitle === undefined) {
                     return
                 }
 
@@ -189,7 +181,7 @@ export default ({vex, actionCreators, selectors, factories, importExport, histor
                 this.props.projectsCreate({
                     id: project.get('id'),
                     data: project.merge({
-                        title: value,
+                        title: projectTitle,
                         activeEnvironmentId: environment.get('id'),
                         environmentIds: List([
                             environment.get('id')

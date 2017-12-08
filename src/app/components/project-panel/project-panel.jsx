@@ -1,6 +1,6 @@
 import React from "react"
 import {Alert, Modal, FormGroup, FormControl, ControlLabel} from "react-bootstrap"
-import swal from "sweetalert"
+import swal from "sweetalert2"
 import {connect} from "react-redux"
 import {bindActionCreators} from "redux"
 
@@ -157,29 +157,21 @@ export default ({factories, actionCreators, selectors, MapEditor, Panel, PanelHe
             swal({
                 title: 'Add environment',
                 text: "Choose a name for the environment",
-                type: 'input',
+                input: 'text',
+                inputValidator: (value) => {
+                    return !value && 'You might want to fill in a name!'
+                },
                 showCancelButton: true,
-                closeOnConfirm: true,
                 animation: false
-            }, (value) => {
+            }).then((result) => {
+                const envTitle = result.value
 
-                if (value === false) {
-                    return
-                }
-
-                if (!value || !value.length) {
-
-                    swal({
-                        title: "Error",
-                        text: "You might want to fill in a name!",
-                        type: "error",
-                        animation: false
-                    })
+                if (envTitle === undefined) {
                     return
                 }
 
                 const environment = factories.createEnvironment().merge({
-                    title: value
+                    title: envTitle
                 })
 
                 this.props.environmentsCreate({
