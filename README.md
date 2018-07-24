@@ -23,6 +23,10 @@
 
 Unpack the latest app from the [releases][0] tab
 
+or run:
+
+````brew cask install graphql-ide````
+
 ### Window / Linux
 
 Releases available soon, for now build the binary using
